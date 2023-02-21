@@ -1,0 +1,11 @@
+[package]
+name = "p"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.1.6", features = ["derive"] }
+dirs = "4.0.0"
+serde = { version = "1.0.152", features = ["derive"] }
+shellexpand = "3.0.0"
+toml = "0.7.2"

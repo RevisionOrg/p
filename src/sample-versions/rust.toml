@@ -1,0 +1,5 @@
+version = "Rust"
+description = "A Rust project"
+files_needed = ["Cargo.toml"]
+directories_needed = ["src"]
+specificity = 1

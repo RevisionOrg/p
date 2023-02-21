@@ -1,0 +1,5 @@
+version = "Node.js"
+description = "Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine."
+files_needed = ["package.json"]
+directories_needed = ["node_modules"]
+specificity = 1

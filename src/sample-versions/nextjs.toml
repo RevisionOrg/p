@@ -1,0 +1,5 @@
+version = "Next.js"
+description = "Next.js - the React framework for production"
+files_needed = ["package.json", "tsconfig.json", "next-env.d.ts"]
+directories_needed = ["node_modules"]
+specificity = 2

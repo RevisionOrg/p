@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "This could be your project's management tool."
+echo "$@"

@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::shell::*;
+use crate::shell::log_shell_aliases;
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -17,6 +17,7 @@ pub fn read_config() -> Config {
         println!("This is the first time you're running p.");
         println!("The default configuration is located at {}", config_path.to_str().unwrap());
         log_shell_aliases();
+        std::process::exit(0);
     }
 
     let config_content = std::fs::read_to_string(config_path).expect("Unable to read config file");

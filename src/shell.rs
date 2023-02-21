@@ -2,10 +2,10 @@ fn get_shell_aliases() -> String {
     let shell = std::env::var("SHELL").unwrap_or_else(|_| panic!("Unable to get shell name"));
     let bash_shell_aliases = r#"
 pg() {
-    cd $(p g $1)
+    cd $(p go $1)
 }
 px() {
-    p  x "$@"
+    p  execute "$@"
 }
 pl() {
     p ls
@@ -19,10 +19,10 @@ pi() {
     "#;
     let zsh_shell_aliases = r#"
 pg() {
-    cd $(p g $1)
+    cd $(p go $1)
 }
 px() {
-    p x "$@"
+    p execute "$@"
 }
 pl() {
     p ls

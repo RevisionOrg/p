@@ -7,7 +7,7 @@ A small tool to manage your projects.
 - Navigate to a project (`p go`/`pg`)
 - Execute a command in the current project (`p execute`/`px`)
 
-(The short commands can only be used if you have added the aliases (`p completions`) to your shell)
+(The short commands can only be used if you have added the aliases (`p aliases`) to your shell)
 
 # Installation
 Download the binary from the latest release and install it.

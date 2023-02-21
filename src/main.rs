@@ -29,6 +29,8 @@ enum Commands {
     Go(GoArgs),
     /// Generate a shell completion script and print it to stdout
     Completions(CompletionsArgs),
+    /// Get aliases for your shell (p execute -> px)
+    Aliases(CompletionsArgs),
 }
 
 #[derive(Args)]
@@ -157,6 +159,9 @@ fn main() {
                 Shell::Bash => generate(Bash, &mut cmd, "p", &mut std::io::stdout()),
                 Shell::Zsh => generate(Zsh, &mut cmd, "p", &mut std::io::stdout()),
             }
+        }
+        Commands::Aliases(_) => {
+            shell::log_shell_aliases();
         }
     }
 }

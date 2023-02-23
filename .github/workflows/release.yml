@@ -6,70 +6,50 @@ on:
       - 'v*'
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    name: Building (${{ matrix.job.os }})
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      matrix:
+        job:
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            use-cross: false
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            use-cross: false
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            use-cross: false
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            use-cross: false
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            use-cross: true
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: Installing Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          target: ${{ matrix.job.target }}
+          profile: release
           override: true
-          target: x86_64-apple-darwin
-      - uses: actions-rs/cargo@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Cargo build
+        uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --target x86_64-apple-darwin
+          use-cross: ${{ matrix.job.use-cross }}
+          args: --release --target ${{ matrix.job.target }}
 
-      - uses: actions-rs/toolchain@v1
+      - name: Releasing assets
+        uses: softprops/action-gh-release@v1
         with:
-          toolchain: stable
-          override: true
-          target: aarch64-apple-darwin
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target aarch64-apple-darwin
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          target: x86_64-pc-windows-msvc
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target x86_64-pc-windows-msvc
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          target: x86_64-unknown-linux-gnu
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target x86_64-unknown-linux-gnu
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: release
-          path: |
-            target/x86_64-apple-darwin/release/p
-            target/aarch64-apple-darwin/release/p
-            target/x86_64-pc-windows-msvc/release/p.exe
-            target/x86_64-unknown-linux-gnu/release/p
-
-  release:
-    name: Release
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: release
-      - uses: softprops/action-gh-release@v1
-        with:
-          files: p
+          files: |
+            p
+            p.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -33,7 +33,7 @@ jobs:
         with:
           toolchain: stable
           target: ${{ matrix.job.target }}
-          profile: release
+          profile: minimal
           override: true
       - name: Checkout repository
         uses: actions/checkout@v2

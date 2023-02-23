@@ -49,7 +49,8 @@ jobs:
         with:
           files: |
             target/${{ matrix.job.target }}/release/p
-            target/${{ matrix.job.target }}/release/p.*
+            target/${{ matrix.job.target }}/release/p.exe
+            target/${{ matrix.job.target }}/release/p.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -51,6 +51,7 @@ jobs:
             target/${{ matrix.job.target }}/release/p
             target/${{ matrix.job.target }}/release/p.exe
             target/${{ matrix.job.target }}/release/p.deb
+          asset_name: p-${{ matrix.job.target }}-${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -4,7 +4,7 @@ use clap_complete::generate;
 use clap_complete::Shell::{Bash, Zsh};
 use colored::Colorize;
 
-use crate::versions::{get_current_directory_version, get_directory_version};
+use crate::versions::{get_current_directory_versions, get_directory_versions};
 
 mod config;
 mod versions;
@@ -66,9 +66,19 @@ fn main() {
 
     match &cli.command {
         Commands::Info(_) => {
+            let current_directory_versions = get_current_directory_versions();
+
             println!("{}", format!("Project: {}", std::fs::canonicalize(".").unwrap().file_name().unwrap().to_str().unwrap()).bold().underline());
-            println!("{}", format!("Version: {}", get_current_directory_version()[0].version).bold());
-            println!("{}", get_current_directory_version()[0].description);
+            if current_directory_versions.len() > 1 {
+                println!("{}", format!("{} Versions:", current_directory_versions.len()).bold());
+                for version in current_directory_versions {
+                    println!("{} - {}", version.version, version.description);
+                }
+            }
+            else {
+                println!("{}", format!("Version: {}", get_current_directory_versions()[0].version).bold());
+                println!("{}", get_current_directory_versions()[0].description);
+            }
         }
         Commands::Ls(_) => {
             let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
@@ -116,12 +126,12 @@ fn main() {
                         dots.push('.');
                     }
 
-                    println!("{}{}{}", project_name.bold(), dots.truecolor(30, 30, 30), get_directory_version(&project_path)[0].version);
+                    println!("{}{}{}", project_name.bold(), dots.truecolor(30, 30, 30), get_directory_versions(&project_path).iter().map(|version| version.version.clone()).collect::<Vec<String>>().join(", ").truecolor(30, 30, 30));
                 }
             }
         }
         Commands::Execute(execute_args) => {
-            let project_version = &get_current_directory_version()[0];
+            let project_version = &get_current_directory_versions()[0];
             let project_management_tool = match &project_version.project_management_tool {
                 Some(project_management_tool) => project_management_tool,
                 None => &config.project_management_tool,

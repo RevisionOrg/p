@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
+use crate::config::{get_config_directory};
+
 #[derive(Deserialize, Serialize)]
 pub struct VersionConfig {
     pub version: String,
@@ -11,23 +13,28 @@ pub struct VersionConfig {
     pub project_management_tool: Option<String>,
 }
 
-pub fn get_current_directory_version() -> Vec<VersionConfig> {
-    let current_directory = std::env::current_dir().expect("Unable to get current directory");
-    let directory_version = get_directory_version(&current_directory);
+pub fn get_versions_directory() -> PathBuf {
+    let mut versions_directory = get_config_directory();
+    versions_directory.push("versions");
 
-    directory_version
-}
-
-pub fn get_directory_version(directory: &PathBuf) -> Vec<VersionConfig> {
-    let mut versions_path = dirs::home_dir().expect("Unable to get home directory");
-    versions_path.push(".p/versions");
-
-    if !versions_path.exists() {
-        create_empty_version_directory();
+    if !versions_directory.exists() {
+        std::fs::create_dir_all(&versions_directory).expect("Unable to create versions directory");
         create_sample_version_in_versions_directory();
     }
 
-    let versions_configs = std::fs::read_dir(versions_path).expect("Unable to read versions directory").filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
+    versions_directory
+}
+
+pub fn get_current_directory_versions() -> Vec<VersionConfig> {
+    let current_directory = std::env::current_dir().expect("Unable to get current directory");
+    let directory_versions = get_directory_versions(&current_directory);
+
+    directory_versions
+}
+
+pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
+    let versions_directory = get_versions_directory();
+    let versions_configs = std::fs::read_dir(versions_directory).expect("Unable to read versions directory").filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
     let mut versions: Vec<VersionConfig> = vec![];
 
     for version_config in versions_configs {
@@ -93,16 +100,9 @@ pub fn sort_versions_by_specificity(versions: Vec<VersionConfig>) -> Vec<Version
     sorted_versions
 }
 
-pub fn create_empty_version_directory() {
-    let mut versions_path = dirs::home_dir().expect("Unable to get home directory");
-    versions_path.push(".p/versions");
-
-    std::fs::create_dir_all(versions_path).expect("Unable to create versions directory");
-}
-
 pub fn create_sample_version_in_versions_directory() {
-    let mut versions_path = dirs::home_dir().expect("Unable to get home directory");
-    versions_path.push(".p/versions/rust.toml");
+    let mut versions_path = get_versions_directory();
+    versions_path.push("rust.toml");
 
     let version_config = VersionConfig {
         version: "Rust".to_string(),

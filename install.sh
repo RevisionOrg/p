@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sudo cp ./target/release/p /usr/local/bin/p
+sudo cp ./target/debug/p /usr/local/bin/p

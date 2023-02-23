@@ -3,7 +3,7 @@ A small tool to manage your projects.
 
 ## What can it do?
 
-- List all your projects (`p ls`/`pl`)
+- List all of your projects (`p ls`/`pl`)
 - Navigate to a project (`p go`/`pg`)
 - Execute a command in the current project (`p execute`/`px`)
 

@@ -46,9 +46,9 @@ jobs:
 
       - name: Renaming binary
         run: |
-          mv target/${{ matrix.job.target }}/release/p target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}
-          mv target/${{ matrix.job.target }}/release/p.exe target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.exe
-          mv target/${{ matrix.job.target }}/release/p.deb target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.deb
+          mv target/${{ matrix.job.target }}/release/p target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }} || true
+          mv target/${{ matrix.job.target }}/release/p.exe target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.exe || true
+          mv target/${{ matrix.job.target }}/release/p.deb target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.deb || true
 
       - name: Releasing assets
         uses: softprops/action-gh-release@v1

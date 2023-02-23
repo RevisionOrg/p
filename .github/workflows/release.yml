@@ -44,6 +44,12 @@ jobs:
           use-cross: ${{ matrix.job.use-cross }}
           args: --release --target ${{ matrix.job.target }}
 
+      - name: Renaming binary
+        run: |
+          mv target/${{ matrix.job.target }}/release/p target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}
+          mv target/${{ matrix.job.target }}/release/p.exe target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.exe
+          mv target/${{ matrix.job.target }}/release/p.deb target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.deb
+
       - name: Releasing assets
         uses: softprops/action-gh-release@v1
         with:
@@ -51,7 +57,6 @@ jobs:
             target/${{ matrix.job.target }}/release/p
             target/${{ matrix.job.target }}/release/p.exe
             target/${{ matrix.job.target }}/release/p.deb
-          asset_name: p-${{ matrix.job.target }}-${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

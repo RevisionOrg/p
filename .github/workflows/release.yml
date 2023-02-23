@@ -48,8 +48,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            p
-            p.*
+            target/${{ matrix.job.target }}/release/p
+            target/${{ matrix.job.target }}/release/p.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

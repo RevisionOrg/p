@@ -1,10 +1,8 @@
-use clap::{CommandFactory};
+use clap::CommandFactory;
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_complete::generate;
 use clap_complete::Shell::{Bash, Zsh};
 use colored::Colorize;
-
-use crate::versions::{get_current_directory_versions, get_directory_versions};
 
 mod config;
 mod versions;
@@ -31,6 +29,8 @@ enum Commands {
     Completions(CompletionsArgs),
     /// Get aliases for your shell (p execute -> px)
     Aliases(CompletionsArgs),
+    /// Sync external version sources
+    Sync(SyncArgs)
 }
 
 #[derive(Args)]
@@ -38,6 +38,9 @@ struct InfoArgs {}
 
 #[derive(Args)]
 struct LsArgs {}
+
+#[derive(Args)]
+struct SyncArgs {}
 
 #[derive(Args)]
 struct ExecuteArgs {
@@ -48,6 +51,7 @@ struct ExecuteArgs {
 struct GoArgs {
     project: String,
 }
+
 
 #[derive(Args)]
 struct CompletionsArgs {
@@ -66,7 +70,7 @@ fn main() {
 
     match &cli.command {
         Commands::Info(_) => {
-            let current_directory_versions = get_current_directory_versions();
+            let current_directory_versions = versions::get_current_directory_versions();
 
             println!("{}", format!("Project: {}", std::fs::canonicalize(".").unwrap().file_name().unwrap().to_str().unwrap()).bold().underline());
             if current_directory_versions.len() > 1 {
@@ -76,8 +80,8 @@ fn main() {
                 }
             }
             else {
-                println!("{}", format!("Version: {}", get_current_directory_versions()[0].version).bold());
-                println!("{}", get_current_directory_versions()[0].description);
+                println!("{}", format!("Version: {}", versions::get_current_directory_versions()[0].version).bold());
+                println!("{}", versions::get_current_directory_versions()[0].description);
             }
         }
         Commands::Ls(_) => {
@@ -115,23 +119,32 @@ fn main() {
                 let project = project.expect("Unable to read project");
                 let project_path = project.path();
 
-
                 if project_path.is_dir() {
                     let project_name = project_path.file_name().unwrap().to_str().unwrap();
                     let project_name_length = project_name.chars().count();
                     let dots_between_name_and_version = longest_project_name - project_name_length + 5;
+                    let project_versions_string;
+                    let mut project_versions = versions::get_directory_versions(&project_path);
                     let mut dots = String::new();
 
                     for _ in 0..dots_between_name_and_version {
                         dots.push('.');
                     }
 
-                    println!("{}{}{}", project_name.bold(), dots.truecolor(30, 30, 30), get_directory_versions(&project_path).iter().map(|version| version.version.clone()).collect::<Vec<String>>().join(", ").truecolor(30, 30, 30));
+                    if project_versions.len() > 3 {
+                        project_versions.truncate(3);
+                        project_versions_string = project_versions.iter().map(|version| version.version.clone()).collect::<Vec<String>>().join(", ") + ", ...";
+                    }
+                    else {
+                        project_versions_string = project_versions.iter().map(|version| version.version.clone()).collect::<Vec<String>>().join(", ");
+                    }
+
+                    println!("{}{}{}", project_name.bold(), dots.truecolor(30, 30, 30), project_versions_string);
                 }
             }
         }
         Commands::Execute(execute_args) => {
-            let project_version = &get_current_directory_versions()[0];
+            let project_version = &versions::get_current_directory_versions()[0];
             let project_management_tool = match &project_version.project_management_tool {
                 Some(project_management_tool) => project_management_tool,
                 None => &config.project_management_tool,
@@ -142,12 +155,11 @@ fn main() {
             command.spawn().expect("Error executing command");
         }
         Commands::Go(go_args) => {
-            let mut project_path = shellexpand::tilde(&config.projects_dir).into_owned();
-            project_path.push_str("/");
-            project_path.push_str(&go_args.project);
+            let mut project_path_string = shellexpand::tilde(&config.projects_dir).into_owned();
+            project_path_string.push_str("/");
+            project_path_string.push_str(&go_args.project);
 
-            let project_path = std::path::Path::new(&project_path);
-
+            let project_path = std::path::Path::new(&project_path_string);
             if !project_path.exists() {
                 println!("Project {} does not exist", go_args.project);
                 return;
@@ -156,14 +168,15 @@ fn main() {
             println!("{}", project_path.to_str().unwrap());
         }
         Commands::Completions(completions_args) => {
+            let mut cmd = Cli::command();
+            let available_shells = vec!["bash", "zsh"];
             let shell = match completions_args.completions {
                 Some(shell) => shell,
                 None => {
-                    println!("Please specify a shell");
+                    println!("Please specify a shell. Available shells: {}", available_shells.join(", "));
                     return;
                 }
             };
-            let mut cmd = Cli::command();
 
             match shell {
                 Shell::Bash => generate(Bash, &mut cmd, "p", &mut std::io::stdout()),
@@ -172,6 +185,9 @@ fn main() {
         }
         Commands::Aliases(_) => {
             shell::log_shell_aliases();
+        }
+        Commands::Sync(_) => {
+            versions::sync_version_sources();
         }
     }
 }

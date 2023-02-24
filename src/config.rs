@@ -2,12 +2,19 @@ use std::path::PathBuf;
 
 use serde::Deserialize;
 
-use crate::shell::log_shell_aliases;
-
 #[derive(Deserialize)]
 pub struct Config {
     pub projects_dir: String,
     pub project_management_tool: String,
+    pub version_sources: Option<Vec<String>>,
+}
+
+pub fn read_config() -> Config {
+    let config_path = get_config_path();
+    let config_content = std::fs::read_to_string(config_path).expect("Unable to read config file");
+    let config_parsed: Config = toml::from_str(&config_content).expect("Invalid config file");
+
+    config_parsed
 }
 
 pub fn get_config_directory() -> PathBuf {
@@ -15,22 +22,7 @@ pub fn get_config_directory() -> PathBuf {
     config_directory.push(".p");
 
     if !config_directory.exists() {
-        std::fs::create_dir_all(&config_directory).expect("Unable to create config directory");
-
-        let mut config_path = config_directory.clone();
-        let config_content = r#"
-projects_dir = "~/Projects"
-project_management_tool = "./project"
-        "#;
-
-        config_path.push("config.toml");
-        std::fs::write(&config_directory, config_content).expect("Unable to write default config file");
-
-        println!("This is the first time you're running p.");
-        println!("The default configuration is located at {}", config_path.to_str().unwrap());
-        log_shell_aliases();
-
-        std::process::exit(0);
+        create_default_config();
     }
 
     config_directory
@@ -43,10 +35,17 @@ pub fn get_config_path() -> PathBuf {
     config_path
 }
 
-pub fn read_config() -> Config {
-    let config_path = get_config_path();
-    let config_content = std::fs::read_to_string(config_path).expect("Unable to read config file");
-    let config_parsed: Config = toml::from_str(&config_content).expect("Invalid config file");
+pub fn create_default_config() {
+    let config_directory = dirs::home_dir().expect("Could not get home directory");
 
-    config_parsed
+    std::fs::create_dir_all(&config_directory).expect("Unable to create config directory");
+
+    let mut config_path = config_directory.clone();
+    let config_content = r#"
+projects_dir = "~/Projects"
+project_management_tool = "./project"
+"#;
+
+    config_path.push("config.toml");
+    std::fs::write(&config_directory, config_content).expect("Unable to write default config file");
 }

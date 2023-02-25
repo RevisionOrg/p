@@ -8,7 +8,7 @@ px() {
     p  execute "$@"
 }
 pl() {
-    p ls
+    p list
 }
 pc() {
     cd ~/.p/
@@ -25,7 +25,7 @@ px() {
     p execute "$@"
 }
 pl() {
-    p ls
+    p list
 }
 pc() {
     cd ~/.p/

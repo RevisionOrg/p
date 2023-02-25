@@ -3,10 +3,12 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_complete::generate;
 use clap_complete::Shell::{Bash, Zsh};
 use colored::Colorize;
+use repositories::{Repo, RepositoryCommands};
 
 mod config;
 mod versions;
 mod shell;
+mod repositories;
 
 #[derive(Parser)]
 #[command(name = "p")]
@@ -20,7 +22,7 @@ enum Commands {
     /// Get information about the current project
     Info(InfoArgs),
     /// List all projects in the projects directory
-    Ls(LsArgs),
+    List(ListArgs),
     /// Execute a command in the current directory using the project management tool
     Execute(ExecuteArgs),
     /// Get the path of a project
@@ -29,18 +31,18 @@ enum Commands {
     Completions(CompletionsArgs),
     /// Get aliases for your shell (p execute -> px)
     Aliases(CompletionsArgs),
-    /// Sync external version sources
-    Sync(SyncArgs)
+    /// Repository management
+    Repo(Repo),
 }
 
 #[derive(Args)]
 struct InfoArgs {}
 
 #[derive(Args)]
-struct LsArgs {}
+struct ListArgs {}
 
 #[derive(Args)]
-struct SyncArgs {}
+struct RepoSyncArgs {}
 
 #[derive(Args)]
 struct ExecuteArgs {
@@ -84,7 +86,7 @@ fn main() {
                 println!("{}", versions::get_current_directory_versions()[0].description);
             }
         }
-        Commands::Ls(_) => {
+        Commands::List(_) => {
             let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
             let projects = std::fs::read_dir(&projects_dir)
                 .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
@@ -186,8 +188,21 @@ fn main() {
         Commands::Aliases(_) => {
             shell::log_shell_aliases();
         }
-        Commands::Sync(_) => {
-            versions::sync_version_sources();
+        Commands::Repo(repo) => {
+            match &repo.command {
+                RepositoryCommands::Sync(_) => {
+                    repositories::sync_version_repositories();
+                }
+                RepositoryCommands::Add(add_repo) => {
+                    repositories::add_repository_url_to_config(&add_repo.repository);
+                }
+                RepositoryCommands::Remove(remove_repo) => {
+                    repositories::remove_repository_url_from_config(&remove_repo.repository);
+                }
+                RepositoryCommands::List(_) => {
+                    repositories::list_version_repositories();
+                }
+            }
         }
     }
 }

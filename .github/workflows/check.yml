@@ -1,8 +1,8 @@
-name: Release
+name: Check
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - '*'
 jobs:
   build:
     name: Building (${{ matrix.job.os }})
@@ -45,16 +45,3 @@ jobs:
           mv target/${{ matrix.job.target }}/release/p target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }} || true
           mv target/${{ matrix.job.target }}/release/p.exe target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.exe || true
           mv target/${{ matrix.job.target }}/release/p.deb target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.deb || true
-
-      - name: Releasing assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}
-            target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.deb
-            target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-permissions:
-  contents: write

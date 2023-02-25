@@ -5,10 +5,10 @@ use clap_complete::Shell::{Bash, Zsh};
 use colored::Colorize;
 use repositories::{Repo, RepositoryCommands};
 
-mod config;
-mod versions;
-mod shell;
-mod repositories;
+pub mod config;
+pub mod repositories;
+pub mod shell;
+pub mod versions;
 
 #[derive(Parser)]
 #[command(name = "p")]
@@ -54,7 +54,6 @@ struct GoArgs {
     project: String,
 }
 
-
 #[derive(Args)]
 struct CompletionsArgs {
     completions: Option<Shell>,
@@ -74,16 +73,41 @@ fn main() {
         Commands::Info(_) => {
             let current_directory_versions = versions::get_current_directory_versions();
 
-            println!("{}", format!("Project: {}", std::fs::canonicalize(".").unwrap().file_name().unwrap().to_str().unwrap()).bold().underline());
+            println!(
+                "{}",
+                format!(
+                    "Project: {}",
+                    std::fs::canonicalize(".")
+                        .unwrap()
+                        .file_name()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                )
+                .bold()
+                .underline()
+            );
             if current_directory_versions.len() > 1 {
-                println!("{}", format!("{} Versions:", current_directory_versions.len()).bold());
+                println!(
+                    "{}",
+                    format!("{} Versions:", current_directory_versions.len()).bold()
+                );
                 for version in current_directory_versions {
                     println!("{} - {}", version.version, version.description);
                 }
-            }
-            else {
-                println!("{}", format!("Version: {}", versions::get_current_directory_versions()[0].version).bold());
-                println!("{}", versions::get_current_directory_versions()[0].description);
+            } else {
+                println!(
+                    "{}",
+                    format!(
+                        "Version: {}",
+                        versions::get_current_directory_versions()[0].version
+                    )
+                    .bold()
+                );
+                println!(
+                    "{}",
+                    versions::get_current_directory_versions()[0].description
+                );
             }
         }
         Commands::List(_) => {
@@ -92,11 +116,14 @@ fn main() {
                 .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
             let projects_count_dir = projects_dir.clone();
             let projects_count = std::fs::read_dir(&projects_count_dir)
-                .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_count_dir))
+                .unwrap_or_else(|_| {
+                    panic!("Unable to read projects directory: {}", projects_count_dir)
+                })
                 .count();
             let projects_name_dir = projects_dir;
-            let projects_name = std::fs::read_dir(&projects_name_dir)
-                .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_name_dir));
+            let projects_name = std::fs::read_dir(&projects_name_dir).unwrap_or_else(|_| {
+                panic!("Unable to read projects directory: {}", projects_name_dir)
+            });
             let mut longest_project_name = 0;
             let projects_string = format!("{} Projects:", projects_count);
 
@@ -124,7 +151,8 @@ fn main() {
                 if project_path.is_dir() {
                     let project_name = project_path.file_name().unwrap().to_str().unwrap();
                     let project_name_length = project_name.chars().count();
-                    let dots_between_name_and_version = longest_project_name - project_name_length + 5;
+                    let dots_between_name_and_version =
+                        longest_project_name - project_name_length + 5;
                     let project_versions_string;
                     let mut project_versions = versions::get_directory_versions(&project_path);
                     let mut dots = String::new();
@@ -135,13 +163,26 @@ fn main() {
 
                     if project_versions.len() > 3 {
                         project_versions.truncate(3);
-                        project_versions_string = project_versions.iter().map(|version| version.version.clone()).collect::<Vec<String>>().join(", ") + ", ...";
-                    }
-                    else {
-                        project_versions_string = project_versions.iter().map(|version| version.version.clone()).collect::<Vec<String>>().join(", ");
+                        project_versions_string = project_versions
+                            .iter()
+                            .map(|version| version.version.clone())
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                            + ", ...";
+                    } else {
+                        project_versions_string = project_versions
+                            .iter()
+                            .map(|version| version.version.clone())
+                            .collect::<Vec<String>>()
+                            .join(", ");
                     }
 
-                    println!("{}{}{}", project_name.bold(), dots.truecolor(30, 30, 30), project_versions_string);
+                    println!(
+                        "{}{}{}",
+                        project_name.bold(),
+                        dots.truecolor(30, 30, 30),
+                        project_versions_string
+                    );
                 }
             }
         }
@@ -175,7 +216,10 @@ fn main() {
             let shell = match completions_args.completions {
                 Some(shell) => shell,
                 None => {
-                    println!("Please specify a shell. Available shells: {}", available_shells.join(", "));
+                    println!(
+                        "Please specify a shell. Available shells: {}",
+                        available_shells.join(", ")
+                    );
                     return;
                 }
             };
@@ -188,21 +232,19 @@ fn main() {
         Commands::Aliases(_) => {
             shell::log_shell_aliases();
         }
-        Commands::Repo(repo) => {
-            match &repo.command {
-                RepositoryCommands::Sync(_) => {
-                    repositories::sync_version_repositories();
-                }
-                RepositoryCommands::Add(add_repo) => {
-                    repositories::add_repository_url_to_config(&add_repo.repository);
-                }
-                RepositoryCommands::Remove(remove_repo) => {
-                    repositories::remove_repository_url_from_config(&remove_repo.repository);
-                }
-                RepositoryCommands::List(_) => {
-                    repositories::list_version_repositories();
-                }
+        Commands::Repo(repo) => match &repo.command {
+            RepositoryCommands::Sync(_) => {
+                repositories::sync_version_repositories();
             }
-        }
+            RepositoryCommands::Add(add_repo) => {
+                repositories::add_repository_url_to_config(&add_repo.repository);
+            }
+            RepositoryCommands::Remove(remove_repo) => {
+                repositories::remove_repository_url_from_config(&remove_repo.repository);
+            }
+            RepositoryCommands::List(_) => {
+                repositories::list_version_repositories();
+            }
+        },
     }
 }

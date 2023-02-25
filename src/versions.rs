@@ -1,7 +1,7 @@
-use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
-use crate::{config::{get_config_directory}, repositories};
+use crate::{config::get_config_directory, repositories};
 
 #[derive(Deserialize, Serialize)]
 pub struct VersionConfig {
@@ -34,14 +34,22 @@ pub fn get_current_directory_versions() -> Vec<VersionConfig> {
 
 pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
     let versions_directory = get_versions_directory();
-    let versions_configs = std::fs::read_dir(versions_directory).expect("Unable to read versions directory").filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
+    let versions_configs = std::fs::read_dir(versions_directory)
+        .expect("Unable to read versions directory")
+        .filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
     let external_versions_configs = repositories::get_repositories_configs();
     let all_versions_configs = versions_configs.chain(external_versions_configs);
     let mut versions: Vec<VersionConfig> = vec![];
 
     for version_config in all_versions_configs {
-        let version_config_content = std::fs::read_to_string(version_config.expect("Unable to read version config").path()).expect("Unable to read version config content");
-        let version_config_parsed: VersionConfig = toml::from_str(&version_config_content).expect("Unable to convert version config to TOML");
+        let version_config_content = std::fs::read_to_string(
+            version_config
+                .expect("Unable to read version config")
+                .path(),
+        )
+        .expect("Unable to read version config content");
+        let version_config_parsed: VersionConfig = toml::from_str(&version_config_content)
+            .expect("Unable to convert version config to TOML");
 
         let mut files_needed = version_config_parsed.files_needed.clone();
         let mut directories_needed = version_config_parsed.directories_needed.clone();
@@ -64,8 +72,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
             if !directory_needed_path.exists() {
                 should_include_version = false;
                 break;
-            }
-            else if !directory_needed_path.is_dir() {
+            } else if !directory_needed_path.is_dir() {
                 should_include_version = false;
                 break;
             }
@@ -87,8 +94,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
         });
 
         versions
-    }
-    else {
+    } else {
         let sorted_versions = sort_versions_by_specificity(versions);
 
         sorted_versions
@@ -114,7 +120,8 @@ pub fn create_sample_version_in_versions_directory() {
         specificity: 1,
         project_management_tool: Some("./project".to_string()),
     };
-    let version_config = toml::to_string(&version_config).expect("Unable to convert version config to TOML");
+    let version_config =
+        toml::to_string(&version_config).expect("Unable to convert version config to TOML");
 
     std::fs::write(versions_path, version_config).expect("Unable to write version config to file");
 }

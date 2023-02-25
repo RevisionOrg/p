@@ -11,6 +11,12 @@ To add this repository to your `p` configuration, run the following command:
 p repo add GIT_URL
 ```
 
+Sync all of your repositories with the remote repositories:
+```bash
+p repo sync
+```
+This will download all of the version configurations from the remote repositories and store them in `~/.p/external_versions/`.
+
 To list all of your repositories, run the following command:
 ```bash
 p repo list
@@ -23,7 +29,7 @@ p repo remove GIT_URL
 
 ### Configuration
 
-Add the following line to your `~/.p/config.toml` file:
+If you don't want to use the CLI, add/remove the following line to your `~/.p/config.toml` file:
 ```toml
 version_repositories = ["GIT_URL"]
 ```

@@ -114,35 +114,21 @@ fn main() {
             let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
             let projects = std::fs::read_dir(&projects_dir)
                 .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
-            let projects_count_dir = projects_dir.clone();
-            let projects_count = std::fs::read_dir(&projects_count_dir)
-                .unwrap_or_else(|_| {
-                    panic!("Unable to read projects directory: {}", projects_count_dir)
-                })
+            let projects_count = std::fs::read_dir(&projects_dir.clone())
+                .unwrap_or_else(|_| panic!("Unable to read projects directory"))
                 .count();
-            let projects_name_dir = projects_dir;
-            let projects_name = std::fs::read_dir(&projects_name_dir).unwrap_or_else(|_| {
-                panic!("Unable to read projects directory: {}", projects_name_dir)
-            });
-            let mut longest_project_name = 0;
-            let projects_string = format!("{} Projects:", projects_count);
+            let projects_string = format!(
+                "{} {}:",
+                projects_count,
+                if projects_count == 1 {
+                    "Project"
+                } else {
+                    "Projects"
+                }
+            );
 
             println!("{}", projects_string.bold().underline());
             println!();
-
-            for project in projects_name {
-                let project = project.expect("Unable to read project");
-                let project_path = project.path();
-
-                if project_path.is_dir() {
-                    let project_name = project_path.file_name().unwrap().to_str().unwrap();
-                    let project_name_length = project_name.chars().count();
-
-                    if project_name_length > longest_project_name {
-                        longest_project_name = project_name_length;
-                    }
-                }
-            }
 
             for project in projects {
                 let project = project.expect("Unable to read project");
@@ -150,39 +136,16 @@ fn main() {
 
                 if project_path.is_dir() {
                     let project_name = project_path.file_name().unwrap().to_str().unwrap();
-                    let project_name_length = project_name.chars().count();
-                    let dots_between_name_and_version =
-                        longest_project_name - project_name_length + 5;
                     let project_versions_string;
-                    let mut project_versions = versions::get_directory_versions(&project_path);
-                    let mut dots = String::new();
+                    let project_versions = versions::get_directory_versions(&project_path);
 
-                    for _ in 0..dots_between_name_and_version {
-                        dots.push('.');
-                    }
+                    project_versions_string = project_versions
+                        .iter()
+                        .map(|version| version.version.clone())
+                        .collect::<Vec<String>>()
+                        .join(", ");
 
-                    if project_versions.len() > 3 {
-                        project_versions.truncate(3);
-                        project_versions_string = project_versions
-                            .iter()
-                            .map(|version| version.version.clone())
-                            .collect::<Vec<String>>()
-                            .join(", ")
-                            + ", ...";
-                    } else {
-                        project_versions_string = project_versions
-                            .iter()
-                            .map(|version| version.version.clone())
-                            .collect::<Vec<String>>()
-                            .join(", ");
-                    }
-
-                    println!(
-                        "{}{}{}",
-                        project_name.bold(),
-                        dots.truecolor(30, 30, 30),
-                        project_versions_string
-                    );
+                    println!("{} ({})", project_name.bold(), project_versions_string);
                 }
             }
         }

@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{Args, Subcommand};
+use colored::Colorize;
 
 use crate::config;
 
@@ -203,7 +204,28 @@ pub fn remove_repository_url_from_config(repository_url: &str) {
 pub fn list_version_repositories() {
     let config = config::read_config();
 
-    if let Some(version_repositories) = config.version_repositories {
+    if let Some(version_repositories) = &config.version_repositories {
+        let number_of_version_repositories = config
+            .version_repositories
+            .as_ref()
+            .map(|version_repositories| version_repositories.len())
+            .unwrap_or(0);
+
+        println!(
+            "{}",
+            format!(
+                "{} External version {}:",
+                number_of_version_repositories,
+                if number_of_version_repositories == 1 {
+                    "repository"
+                } else {
+                    "repositories"
+                }
+            )
+            .bold()
+            .underline()
+        );
+        println!();
         for version_repository in version_repositories {
             println!("{}", version_repository);
         }

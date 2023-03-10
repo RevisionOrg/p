@@ -21,6 +21,8 @@ pub enum RepositoryCommands {
     Remove(RepositoryRemoveArgs),
     /// List repositories
     List(RepositoryListArgs),
+    /// Get the path of the repositories directory
+    Go(RepositoryGoArgs),
 }
 
 #[derive(Args)]
@@ -35,6 +37,9 @@ pub struct RepositoryAddArgs {
 pub struct RepositoryRemoveArgs {
     pub repository: String,
 }
+
+#[derive(Args)]
+pub struct RepositoryGoArgs {}
 
 #[derive(Args)]
 pub struct RepositoryListArgs {}

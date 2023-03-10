@@ -208,6 +208,12 @@ fn main() {
             RepositoryCommands::List(_) => {
                 repositories::list_version_repositories();
             }
+            RepositoryCommands::Go(_) => {
+                println!(
+                    "{}",
+                    repositories::get_repositories_directory().to_str().unwrap()
+                );
+            }
         },
     }
 }

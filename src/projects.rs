@@ -5,7 +5,7 @@ use colored::Colorize;
 use simsearch::SimSearch;
 
 use crate::Shell;
-use crate::{config::Config, versions, CompletionsArgs, ExecuteArgs, GoArgs, Cli};
+use crate::{config::Config, versions, Cli, CompletionsArgs, ExecuteArgs, GoArgs};
 
 pub fn get_info_for_project_in_current_directory() {
     let current_directory_versions = versions::get_current_directory_versions();
@@ -146,7 +146,14 @@ pub fn find_project_in_projects_directory(config: &Config, project_name: &str) {
         let project = project.expect("Unable to read project");
         let project_path = project.path();
 
-        project_names.push(project_path.file_name().unwrap().to_str().unwrap().to_string());
+        project_names.push(
+            project_path
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string(),
+        );
     }
 
     for project_name in &project_names {
@@ -161,23 +168,37 @@ pub fn find_project_in_projects_directory(config: &Config, project_name: &str) {
         return;
     }
 
-    let top_five_project_search_results = project_search_result
-        .iter()
-        .take(5)
-        .collect::<Vec<&u32>>();
+    let top_five_project_search_results =
+        project_search_result.iter().take(5).collect::<Vec<&u32>>();
 
     println!(
         "{}",
-        format!(
-            "Search results for \"{}\":",
-            project_name
-        )
-        .bold()
-        .underline()
+        format!("Search results for \"{}\":", project_name)
+            .bold()
+            .underline()
     );
     for project_search_result_index in top_five_project_search_results {
         let project_at_index = &project_names[*project_search_result_index as usize];
 
         println!("{}", project_at_index);
     }
+}
+
+pub fn open_editor(config: &Config) {
+    let editor = config.editor.clone();
+
+    if editor.clone().is_none() {
+        println!(
+            "No editor set. Please set your preferred code editor or IDE in your config file."
+        );
+        return;
+    }
+
+    std::process::Command::new("sh")
+        .arg("-c")
+        .arg(editor.unwrap())
+        .spawn()
+        .expect("Error: Failed to run editor")
+        .wait()
+        .expect("Error: Editor returned a non-zero status");
 }

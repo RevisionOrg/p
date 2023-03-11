@@ -32,6 +32,8 @@ enum Commands {
     Repo(Repo),
     /// Find a project
     Find(FindArgs),
+    /// Open your preferred editor in the current project
+    Edit(EditArgs),
 }
 
 #[derive(Args)]
@@ -42,6 +44,9 @@ pub struct ListArgs {}
 
 #[derive(Args)]
 pub struct RepoSyncArgs {}
+
+#[derive(Args)]
+pub struct EditArgs {}
 
 #[derive(Args)]
 pub struct ExecuteArgs {
@@ -95,6 +100,9 @@ fn main() {
         Commands::Find(find_args) => {
             projects::find_project_in_projects_directory(&config, &find_args.project)
         }
+        Commands::Edit(_) => {
+            projects::open_editor(&config);
+        }
         Commands::Repo(repo) => match &repo.command {
             RepositoryCommands::Sync(_) => {
                 repositories::sync_version_repositories();
@@ -113,6 +121,9 @@ fn main() {
                     "{}",
                     repositories::get_repositories_directory().to_str().unwrap()
                 );
+            }
+            RepositoryCommands::New(new_repo) => {
+                repositories::create_new_repository(&new_repo.name);
             }
         },
     }

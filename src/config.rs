@@ -7,6 +7,7 @@ pub struct Config {
     pub projects_dir: String,
     pub project_management_tool: String,
     pub version_repositories: Option<Vec<String>>,
+    pub editor: Option<String>
 }
 
 pub fn read_config() -> Config {

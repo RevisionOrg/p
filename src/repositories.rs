@@ -23,6 +23,8 @@ pub enum RepositoryCommands {
     List(RepositoryListArgs),
     /// Get the path of the repositories directory
     Go(RepositoryGoArgs),
+    /// Initialize a new repository
+    New(RepositoryNewArgs),
 }
 
 #[derive(Args)]
@@ -36,6 +38,11 @@ pub struct RepositoryAddArgs {
 #[derive(Args)]
 pub struct RepositoryRemoveArgs {
     pub repository: String,
+}
+
+#[derive(Args)]
+pub struct RepositoryNewArgs {
+    pub name: String,
 }
 
 #[derive(Args)]
@@ -236,5 +243,34 @@ pub fn list_version_repositories() {
         }
     } else {
         println!("No external version repositories found in config");
+    }
+}
+
+pub fn create_new_repository(repository_name: &str) {
+    let external_versions_directory = get_repositories_directory();
+    let mut version_repository_path = external_versions_directory.clone();
+
+    version_repository_path.push(&repository_name);
+
+    if !version_repository_path.exists() {
+        let mut command = std::process::Command::new("git");
+
+        println!("Creating {}...", repository_name);
+        command.arg("init").arg(&repository_name);
+        command.current_dir(&external_versions_directory);
+        command
+            .output()
+            .expect("Unable to create version repository");
+
+        let mut versions_path = version_repository_path.clone();
+        versions_path.push("versions");
+
+        std::fs::create_dir(&versions_path).expect("Unable to create versions directory");
+
+        println!("New external version repository \"{}\" created in {}", repository_name, external_versions_directory.display());
+        println!("Add version configs to {}/versions, commit and push the results.", repository_name);
+        println!("You will then be able to add the repository to your config by running \"p repo add REPOSITORY_URL\"");
+    } else {
+        println!("{} already exists", repository_name);
     }
 }

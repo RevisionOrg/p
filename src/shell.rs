@@ -16,6 +16,9 @@ pc() {
 pi() {
     p info
 }
+pf() {
+    p find "$@"
+}
     "#;
     let zsh_shell_aliases = r#"
 pg() {
@@ -32,6 +35,9 @@ pc() {
 }
 pi() {
     p info
+}
+pf() {
+    p find "$@"
 }
     "#;
 

@@ -10,6 +10,7 @@ colored = "2.0.0"
 dirs = "4.0.0"
 serde = { version = "1.0.152", features = ["derive"] }
 shellexpand = "3.0.0"
+simsearch = "0.2.4"
 toml = "0.7.2"
 
 [profile.release]

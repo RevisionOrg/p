@@ -1,14 +1,11 @@
-use clap::CommandFactory;
 use clap::{Args, Parser, Subcommand, ValueEnum};
-use clap_complete::generate;
-use clap_complete::Shell::{Bash, Zsh};
-use colored::Colorize;
 use repositories::{Repo, RepositoryCommands};
 
 pub mod config;
 pub mod repositories;
 pub mod shell;
 pub mod versions;
+pub mod projects;
 
 #[derive(Parser)]
 #[command(name = "p")]
@@ -33,29 +30,36 @@ enum Commands {
     Aliases(CompletionsArgs),
     /// Repository management
     Repo(Repo),
+    /// Find a project
+    Find(FindArgs),
 }
 
 #[derive(Args)]
-struct InfoArgs {}
+pub struct InfoArgs {}
 
 #[derive(Args)]
-struct ListArgs {}
+pub struct ListArgs {}
 
 #[derive(Args)]
-struct RepoSyncArgs {}
+pub struct RepoSyncArgs {}
 
 #[derive(Args)]
-struct ExecuteArgs {
+pub struct ExecuteArgs {
     arguments: Vec<String>,
 }
 
 #[derive(Args)]
-struct GoArgs {
+pub struct GoArgs {
     project: String,
 }
 
 #[derive(Args)]
-struct CompletionsArgs {
+pub struct FindArgs {
+    project: String,
+}
+
+#[derive(Args)]
+pub struct CompletionsArgs {
     completions: Option<Shell>,
 }
 
@@ -71,129 +75,25 @@ fn main() {
 
     match &cli.command {
         Commands::Info(_) => {
-            let current_directory_versions = versions::get_current_directory_versions();
-
-            println!(
-                "{}",
-                format!(
-                    "Project: {}",
-                    std::fs::canonicalize(".")
-                        .unwrap()
-                        .file_name()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                )
-                .bold()
-                .underline()
-            );
-            if current_directory_versions.len() > 1 {
-                println!(
-                    "{}",
-                    format!("{} Versions:", current_directory_versions.len()).bold()
-                );
-                for version in current_directory_versions {
-                    println!("{} - {}", version.version, version.description);
-                }
-            } else {
-                println!(
-                    "{}",
-                    format!(
-                        "Version: {}",
-                        versions::get_current_directory_versions()[0].version
-                    )
-                    .bold()
-                );
-                println!(
-                    "{}",
-                    versions::get_current_directory_versions()[0].description
-                );
-            }
+            projects::get_info_for_project_in_current_directory();
         }
         Commands::List(_) => {
-            let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
-            let projects = std::fs::read_dir(&projects_dir)
-                .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
-            let projects_count = std::fs::read_dir(&projects_dir.clone())
-                .unwrap_or_else(|_| panic!("Unable to read projects directory"))
-                .count();
-            let projects_string = format!(
-                "{} {}:",
-                projects_count,
-                if projects_count == 1 {
-                    "Project"
-                } else {
-                    "Projects"
-                }
-            );
-
-            println!("{}", projects_string.bold().underline());
-            println!();
-
-            for project in projects {
-                let project = project.expect("Unable to read project");
-                let project_path = project.path();
-
-                if project_path.is_dir() {
-                    let project_name = project_path.file_name().unwrap().to_str().unwrap();
-                    let project_versions_string;
-                    let project_versions = versions::get_directory_versions(&project_path);
-
-                    project_versions_string = project_versions
-                        .iter()
-                        .map(|version| version.version.clone())
-                        .collect::<Vec<String>>()
-                        .join(", ");
-
-                    println!("{} ({})", project_name.bold(), project_versions_string);
-                }
-            }
+            projects::list_projects_in_projects_directory(&config);
         }
         Commands::Execute(execute_args) => {
-            let project_version = &versions::get_current_directory_versions()[0];
-            let project_management_tool = match &project_version.project_management_tool {
-                Some(project_management_tool) => project_management_tool,
-                None => &config.project_management_tool,
-            };
-            let mut command = std::process::Command::new(&project_management_tool);
-
-            command.args(&execute_args.arguments);
-            command.spawn().expect("Error executing command");
+            projects::execute_in_current_project(&config, &execute_args);
         }
         Commands::Go(go_args) => {
-            let mut project_path_string = shellexpand::tilde(&config.projects_dir).into_owned();
-            project_path_string.push_str("/");
-            project_path_string.push_str(&go_args.project);
-
-            let project_path = std::path::Path::new(&project_path_string);
-            if !project_path.exists() {
-                println!("Project {} does not exist", go_args.project);
-                return;
-            }
-
-            println!("{}", project_path.to_str().unwrap());
+            projects::get_project_path(&config, &go_args);
         }
         Commands::Completions(completions_args) => {
-            let mut cmd = Cli::command();
-            let available_shells = vec!["bash", "zsh"];
-            let shell = match completions_args.completions {
-                Some(shell) => shell,
-                None => {
-                    println!(
-                        "Please specify a shell. Available shells: {}",
-                        available_shells.join(", ")
-                    );
-                    return;
-                }
-            };
-
-            match shell {
-                Shell::Bash => generate(Bash, &mut cmd, "p", &mut std::io::stdout()),
-                Shell::Zsh => generate(Zsh, &mut cmd, "p", &mut std::io::stdout()),
-            }
+            projects::get_shell_completions(&completions_args)
         }
         Commands::Aliases(_) => {
             shell::log_shell_aliases();
+        }
+        Commands::Find(find_args) => {
+            projects::find_project_in_projects_directory(&config, &find_args.project)
         }
         Commands::Repo(repo) => match &repo.command {
             RepositoryCommands::Sync(_) => {

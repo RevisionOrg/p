@@ -1,4 +1,19 @@
 #!/usr/bin/env bash
 
-echo "This could be your project's management tool."
-echo "$@"
+# Check for arguments and print usage if none are given
+if [ $# -eq 0 ]; then
+    echo "Usage: COMMAND"
+    exit 1
+fi
+
+# Check for the command and execute it
+if [ "$1" = "build" ]; then
+    cargo build
+    echo "Built to ./target/debug/p"
+elif [ "$1" = "install" ]; then
+    sudo cp ./target/debug/p /usr/local/bin/p
+    echo "Installed to /usr/local/bin/p"
+else
+    echo "Unknown command"
+    exit 1
+fi

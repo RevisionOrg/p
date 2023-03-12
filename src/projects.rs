@@ -97,7 +97,11 @@ pub fn execute_in_current_project(config: &Config, execute_args: &ExecuteArgs) {
     let mut command = std::process::Command::new(&project_management_tool);
 
     command.args(&execute_args.arguments);
-    command.spawn().expect("Error executing command");
+    command
+        .spawn()
+        .expect("Error executing command in current project")
+        .wait()
+        .expect("Error executing command in current project");
 }
 
 pub fn get_project_path(config: &Config, go_args: &GoArgs) {

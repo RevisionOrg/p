@@ -41,6 +41,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
     let all_versions_configs = versions_configs.chain(external_versions_configs);
     let mut versions: Vec<VersionConfig> = vec![];
 
+    // Loop through all known versions configs to find which ones match the current directory
     for version_config in all_versions_configs {
         let version_config_content = std::fs::read_to_string(
             version_config
@@ -83,6 +84,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
         }
     }
 
+    // Show arbitrary "Unknown" version if no version is found
     if versions.len() == 0 {
         versions.push(VersionConfig {
             version: "Unknown".to_string(),

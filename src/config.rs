@@ -40,20 +40,26 @@ pub fn get_config_path() -> PathBuf {
     let mut config_path = get_config_directory();
     config_path.push("config.toml");
 
+    if !config_path.exists() {
+        create_default_config();
+    }
+
     config_path
 }
 
 pub fn create_default_config() {
-    let config_directory = dirs::home_dir().expect("Could not get home directory");
+    let mut config_directory_path = dirs::home_dir().expect("Could not get home directory");
+    config_directory_path.push(".p");
 
-    std::fs::create_dir_all(&config_directory).expect("Unable to create config directory");
+    let mut config_file_path = config_directory_path.clone();
+    config_file_path.push("config.toml");
 
-    let mut config_path = config_directory.clone();
     let config_content = r#"
 projects_dir = "~/Projects"
 project_management_tool = "./project"
 "#;
 
-    config_path.push("config.toml");
-    std::fs::write(&config_directory, config_content).expect("Unable to write default config file");
+
+    std::fs::create_dir_all(&config_directory_path).expect("Unable to create config directory");
+    std::fs::write(&config_file_path, config_content).expect("Unable to write default config file");
 }

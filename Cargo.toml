@@ -4,10 +4,13 @@ version = "0.0.7"
 edition = "2021"
 
 [dependencies]
+assert_cmd = "2.0.8"
 clap = { version = "4.1.6", features = ["derive"] }
 clap_complete = "4.1.2"
 colored = "2.0.0"
 dirs = "4.0.0"
+predicates = "2.1.5"
+regex = "1.7.1"
 serde = { version = "1.0.152", features = ["derive"] }
 shellexpand = "3.0.0"
 simsearch = "0.2.4"

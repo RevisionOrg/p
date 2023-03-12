@@ -33,6 +33,12 @@ jobs:
           override: true
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          use-cross: ${{ matrix.job.use-cross }}
+          args: --target ${{ matrix.job.target }}
       - name: Cargo build
         uses: actions-rs/cargo@v1
         with:

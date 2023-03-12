@@ -1,5 +1,5 @@
 fn get_shell_aliases() -> String {
-    let shell = std::env::var("SHELL").unwrap_or_else(|_| panic!("Unable to get shell name"));
+    let shell = std::env::var("SHELL").unwrap_or_else(|_| "bash".to_string());
     let bash_shell_aliases = r#"
 pg() {
     cd $(p go $1)

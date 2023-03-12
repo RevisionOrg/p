@@ -247,9 +247,8 @@ pub fn list_version_repositories() {
 }
 
 pub fn create_new_repository(repository_name: &str) {
-    let external_versions_directory = get_repositories_directory();
-    let mut version_repository_path = external_versions_directory.clone();
-
+    let current_dir = std::env::current_dir().expect("Unable to get current directory");
+    let mut version_repository_path = current_dir.clone();
     version_repository_path.push(&repository_name);
 
     if !version_repository_path.exists() {
@@ -257,7 +256,7 @@ pub fn create_new_repository(repository_name: &str) {
 
         println!("Creating {}...", repository_name);
         command.arg("init").arg(&repository_name);
-        command.current_dir(&external_versions_directory);
+        command.current_dir(&current_dir);
         command
             .output()
             .expect("Unable to create version repository");
@@ -267,7 +266,7 @@ pub fn create_new_repository(repository_name: &str) {
 
         std::fs::create_dir(&versions_path).expect("Unable to create versions directory");
 
-        println!("New external version repository \"{}\" created in {}", repository_name, external_versions_directory.display());
+        println!("New external version repository \"{}\" created in {}", repository_name, &version_repository_path.display());
         println!("Add version configs to {}/versions, commit and push the results.", repository_name);
         println!("You will then be able to add the repository to your config by running \"p repo add REPOSITORY_URL\"");
     } else {

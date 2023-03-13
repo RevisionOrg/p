@@ -38,24 +38,34 @@ fn subcommands_test() -> Result<(), Box<dyn std::error::Error>> {
     let main_output_string = String::from_utf8(main_output.stdout).unwrap();
     let main_subcommands = parse_help_string(&main_output_string);
 
+    println!("Main Subcommands: {:?}", main_subcommands);
+
     let mut repo_cmd = Command::cargo_bin("p")?;
     repo_cmd.arg("repo").arg("help");
     let repo_output = repo_cmd.output().expect("Failed to execute command");
     let repo_output_string = String::from_utf8(repo_output.stdout).unwrap();
     let repo_subcommands = parse_help_string(&repo_output_string);
 
-    let subcommands = main_subcommands
-        .iter()
-        .chain(repo_subcommands.iter())
-        .map(|s| s.to_string())
-        .collect::<Vec<String>>();
+    println!("Repo Subcommands: {:?}", repo_subcommands);
 
-    println!("Subcommands: {:?}", subcommands);
-
-    for subcommand in subcommands {
+    for subcommand in main_subcommands {
         let mut cmd = Command::cargo_bin("p")?;
 
         cmd.arg(subcommand);
+
+        let assert_success = cmd.status().expect("Failed to execute command").success();
+
+        if !assert_success {
+            cmd.assert().failure().stderr(predicate::str::contains("Usage"));
+        } else {
+            cmd.assert().success();
+        }
+    }
+
+    for subcommand in repo_subcommands {
+        let mut cmd = Command::cargo_bin("p")?;
+
+        cmd.arg("repo").arg(subcommand);
 
         let assert_success = cmd.status().expect("Failed to execute command").success();
 

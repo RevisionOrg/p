@@ -59,7 +59,6 @@ projects_dir = "~/Projects"
 project_management_tool = "./project"
 "#;
 
-
     std::fs::create_dir_all(&config_directory_path).expect("Unable to create config directory");
     std::fs::write(&config_file_path, config_content).expect("Unable to write default config file");
 }

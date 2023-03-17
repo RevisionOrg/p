@@ -39,7 +39,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
         .filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
     let external_versions_configs = repositories::get_repositories_configs();
     let all_versions_configs = versions_configs.chain(external_versions_configs);
-    let mut versions: Vec<VersionConfig> = vec![];
+    let mut directory_versions: Vec<VersionConfig> = vec![];
 
     // Loop through all known versions configs to find which ones match the current directory
     for version_config in all_versions_configs {
@@ -54,14 +54,14 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
 
         let mut files_needed = version_config_parsed.files_needed.clone();
         let mut directories_needed = version_config_parsed.directories_needed.clone();
-        let mut should_include_version = true;
+        let mut should_include_version_in_versions = true;
 
         for file_needed in files_needed.iter_mut() {
             let mut file_needed_path = directory.clone();
             file_needed_path.push(file_needed);
 
             if !file_needed_path.exists() {
-                should_include_version = false;
+                should_include_version_in_versions = false;
                 break;
             }
         }
@@ -71,22 +71,22 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
             directory_needed_path.push(directory_needed);
 
             if !directory_needed_path.exists() {
-                should_include_version = false;
+                should_include_version_in_versions = false;
                 break;
             } else if !directory_needed_path.is_dir() {
-                should_include_version = false;
+                should_include_version_in_versions = false;
                 break;
             }
         }
 
-        if should_include_version {
-            versions.push(version_config_parsed);
+        if should_include_version_in_versions {
+            directory_versions.push(version_config_parsed);
         }
     }
 
     // Show arbitrary "Unknown" version if no version is found
-    if versions.len() == 0 {
-        versions.push(VersionConfig {
+    if directory_versions.len() == 0 {
+        directory_versions.push(VersionConfig {
             version: "Unknown".to_string(),
             description: "Unknown version".to_string(),
             files_needed: vec![],
@@ -95,9 +95,9 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
             project_management_tool: None,
         });
 
-        versions
+        directory_versions
     } else {
-        let sorted_versions = sort_versions_by_specificity(versions);
+        let sorted_versions = sort_versions_by_specificity(directory_versions);
 
         sorted_versions
     }

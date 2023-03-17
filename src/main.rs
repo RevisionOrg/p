@@ -2,10 +2,10 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 use repositories::{Repo, RepositoryCommands};
 
 pub mod config;
+pub mod projects;
 pub mod repositories;
 pub mod shell;
 pub mod versions;
-pub mod projects;
 
 #[derive(Parser)]
 #[command(name = "p")]

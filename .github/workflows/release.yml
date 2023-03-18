@@ -4,8 +4,29 @@ on:
     tags:
       - 'v*'
 jobs:
+
+  generate-changelog:
+    name: Generate changelog
+    runs-on: ubuntu-20.04
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v2
+        id: git-cliff
+        with:
+          config: config/cliff.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: CHANGES.md
+
   build:
     name: Building (${{ matrix.job.os }})
+    needs: generate-changelog
     runs-on: ${{ matrix.job.os }}
     outputs:
       binaries: ${{ steps.list.outputs.binaries }}
@@ -40,20 +61,26 @@ jobs:
         with:
           command: build
           use-cross: ${{ matrix.job.use-cross }}
-          args: --release --target ${{ matrix.job.target }}
+          args: --release --locked --target ${{ matrix.job.target }}
 
       - name: Renaming binary
         run: |
-          mv target/${{ matrix.job.target }}/release/p target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }} || true
-          mv target/${{ matrix.job.target }}/release/p.deb target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }} || true
+          mkdir -p release_temp
+          mv target/${{ matrix.job.target }}/release/p release_temp/p || true
+          mv target/${{ matrix.job.target }}/release/p.deb release_temp/p || true
+          cd release_temp
+          tar -czvf p-${{ matrix.job.target }}.tar.gz p || true
+          shasum -a 512 p-${{ matrix.job.target }}.tar.gz > p-${{ matrix.job.target }}.tar.gz.sha512 || true
+          cd ..
 
       - name: Publish to GitHub
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}*
+          file: release_temp/*
           file_glob: true
           overwrite: true
+          body: "${{ needs.generate-changelog.outputs.release_body }}"
 
 permissions:
   contents: write

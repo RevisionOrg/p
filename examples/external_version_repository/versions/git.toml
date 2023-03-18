@@ -1,0 +1,5 @@
+version = "Git"
+description = "A distributed version control system"
+files_needed = []
+directories_needed = [".git"]
+specificity = 0

@@ -49,6 +49,8 @@ jobs:
       - name: Releasing assets
         uses: softprops/action-gh-release@v1
         with:
+          body: |
+            $(git cliff --current)
           files: |
             target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}
             target/${{ matrix.job.target }}/release/p-${{ matrix.job.target }}.deb

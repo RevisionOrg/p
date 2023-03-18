@@ -6,6 +6,7 @@ pub mod projects;
 pub mod repositories;
 pub mod shell;
 pub mod versions;
+pub mod update;
 
 #[derive(Parser)]
 #[command(name = "p")]
@@ -34,6 +35,8 @@ enum Commands {
     Find(FindArgs),
     /// Open your preferred editor in the current project
     Edit(EditArgs),
+    /// Update p
+    Update(UpdateArgs),
 }
 
 #[derive(Args)]
@@ -67,6 +70,9 @@ pub struct FindArgs {
 pub struct CompletionsArgs {
     completions: Option<Shell>,
 }
+
+#[derive(Args)]
+pub struct UpdateArgs {}
 
 #[derive(ValueEnum, Copy, Clone)]
 pub enum Shell {
@@ -102,6 +108,9 @@ fn main() {
         }
         Commands::Edit(_) => {
             projects::open_editor(&config);
+        }
+        Commands::Update(_) => {
+            update::update().unwrap();
         }
         Commands::Repo(repo) => match &repo.command {
             RepositoryCommands::Sync(_) => {

@@ -77,7 +77,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: release_temp/*
+          file: release_temp/p-*
           file_glob: true
           overwrite: true
           body: "${{ needs.generate-changelog.outputs.release_body }}"

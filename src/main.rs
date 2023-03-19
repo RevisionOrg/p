@@ -1,3 +1,5 @@
+use std::env;
+
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use repositories::{Repo, RepositoryCommands};
 
@@ -83,6 +85,10 @@ pub enum Shell {
 fn main() {
     let config = config::read_config();
     let cli = Cli::parse();
+
+    if cfg!(debug_assertions) {
+        env::set_var("RUST_BACKTRACE", "full");
+    }
 
     match &cli.command {
         Commands::Info(_) => {

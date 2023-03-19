@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 assert_cmd = "2.0.10"
-clap = { version = "4.1.6", features = ["derive"] }
+clap = { version = "4.1.11", features = ["derive"] }
 clap_complete = "4.1.2"
 colored = "2.0.0"
 dirs = "4.0.0"

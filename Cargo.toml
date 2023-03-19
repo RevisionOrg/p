@@ -9,6 +9,7 @@ clap = { version = "4.1.6", features = ["derive"] }
 clap_complete = "4.1.2"
 colored = "2.0.0"
 dirs = "4.0.0"
+openssl = { version = "0.10.46", optional = true }
 predicates = "2.1.5"
 regex = "1.7.1"
 reqwest = "0.11.14"
@@ -24,8 +25,5 @@ strip = true
 opt-level = "z"
 lto = true
 
-[target.x86_64-unknown-linux-gnu]
-pre-build = [
-    "dpkg --add-architecture $CROSS_DEB_ARCH",
-    "apt-get update && apt-get install --assume-yes libssl-dev:$CROSS_DEB_ARCH"
-]
+[features]
+vendored-openssl = ["openssl/vendored"]

@@ -17,15 +17,19 @@ jobs:
           - os: macos-latest
             target: x86_64-apple-darwin
             use-cross: false
+            needs_ssl: false
           - os: macos-latest
             target: aarch64-apple-darwin
             use-cross: false
+            needs_ssl: false
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             use-cross: false
+            needs_ssl: true
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             use-cross: true
+            needs_ssl: true
 
     steps:
       - name: Installing Rust toolchain
@@ -37,6 +41,11 @@ jobs:
           override: true
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Installing openssl
+        if: ${{ matrix.job.needs_ssl }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev
       - name: Cargo build
         uses: actions-rs/cargo@v1
         with:

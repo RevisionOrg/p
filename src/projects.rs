@@ -7,8 +7,9 @@ use simsearch::SimSearch;
 use crate::Shell;
 use crate::{config::Config, versions, Cli, CompletionsArgs, ExecuteArgs, GoArgs};
 
-pub fn get_info_for_project_in_current_directory() {
-    let current_directory_versions = versions::get_current_directory_versions();
+pub fn get_info_for_project_in_directory(directory: &str) {
+    let parsed_directory = std::path::PathBuf::from(directory);
+    let directory_versions = versions::get_directory_versions(&parsed_directory);
 
     println!(
         "{}",
@@ -24,12 +25,12 @@ pub fn get_info_for_project_in_current_directory() {
         .bold()
         .underline()
     );
-    if current_directory_versions.len() > 1 {
+    if directory_versions.len() > 1 {
         println!(
             "{}",
-            format!("{} Versions:", current_directory_versions.len()).bold()
+            format!("{} Versions:", directory_versions.len()).bold()
         );
-        for version in current_directory_versions {
+        for version in directory_versions {
             println!("{} - {}", version.version, version.description);
         }
     } else {
@@ -37,13 +38,13 @@ pub fn get_info_for_project_in_current_directory() {
             "{}",
             format!(
                 "Version: {}",
-                versions::get_current_directory_versions()[0].version
+                versions::get_directory_versions(&parsed_directory)[0].version
             )
             .bold()
         );
         println!(
             "{}",
-            versions::get_current_directory_versions()[0].description
+            versions::get_directory_versions(&parsed_directory)[0].description
         );
     }
 }

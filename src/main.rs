@@ -46,7 +46,10 @@ enum Commands {
 }
 
 #[derive(Args)]
-pub struct InfoArgs {}
+pub struct InfoArgs {
+    #[clap(short, long)]
+    directory: Option<String>,
+}
 
 #[derive(Args)]
 pub struct ListArgs {}
@@ -107,8 +110,13 @@ fn main() {
 
     if cli.command.is_some() {
         match &cli.command.unwrap() {
-            Commands::Info(_) => {
-                projects::get_info_for_project_in_current_directory();
+            Commands::Info(info_args) => {
+                let directory = match &info_args.directory {
+                    Some(directory) => directory,
+                    None => ".",
+                };
+
+                projects::get_info_for_project_in_directory(&directory);
             }
             Commands::List(_) => {
                 projects::list_projects_in_projects_directory(&config);
@@ -163,6 +171,6 @@ fn main() {
             },
         }
     } else {
-        projects::get_info_for_project_in_current_directory();
+        projects::get_info_for_project_in_directory(".");
     }
 }

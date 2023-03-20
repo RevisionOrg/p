@@ -122,7 +122,7 @@ pub fn get_project_path(config: &Config, go_args: &GoArgs) {
 pub fn get_shell_completions(completions_args: &CompletionsArgs) {
     let mut cmd = Cli::command();
     let available_shells = vec!["bash", "zsh"];
-    let shell = match completions_args.completions {
+    let shell = match completions_args.shell {
         Some(shell) => shell,
         None => {
             println!(

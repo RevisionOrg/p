@@ -83,7 +83,7 @@ pub struct FindArgs {
 
 #[derive(Args)]
 pub struct CompletionsArgs {
-    completions: Option<Shell>,
+    shell: Option<Shell>,
 }
 
 #[derive(Args)]

@@ -7,14 +7,18 @@ pub mod config;
 pub mod projects;
 pub mod repositories;
 pub mod shell;
-pub mod versions;
 pub mod update;
+pub mod versions;
 
 #[derive(Parser)]
 #[command(name = "p")]
 struct Cli {
     #[command(subcommand)]
-    command: Commands,
+    command: Option<Commands>,
+
+    /// Print the version of p
+    #[clap(short, long)]
+    version: bool,
 }
 
 #[derive(Subcommand)]
@@ -90,56 +94,65 @@ fn main() {
         env::set_var("RUST_BACKTRACE", "full");
     }
 
-    match &cli.command {
-        Commands::Info(_) => {
-            projects::get_info_for_project_in_current_directory();
-        }
-        Commands::List(_) => {
-            projects::list_projects_in_projects_directory(&config);
-        }
-        Commands::Execute(execute_args) => {
-            projects::execute_in_current_project(&config, &execute_args);
-        }
-        Commands::Go(go_args) => {
-            projects::get_project_path(&config, &go_args);
-        }
-        Commands::Completions(completions_args) => {
-            projects::get_shell_completions(&completions_args)
-        }
-        Commands::Aliases(_) => {
-            shell::log_shell_aliases();
-        }
-        Commands::Find(find_args) => {
-            projects::find_project_in_projects_directory(&config, &find_args.project)
-        }
-        Commands::Edit(_) => {
-            projects::open_editor(&config);
-        }
-        Commands::Update(_) => {
-            update::update().unwrap();
-        }
-        Commands::Repo(repo) => match &repo.command {
-            RepositoryCommands::Sync(_) => {
-                repositories::sync_version_repositories();
+    if cli.version {
+        println!("v{}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
+
+    if cli.command.is_some() {
+        match &cli.command.unwrap() {
+            Commands::Info(_) => {
+                projects::get_info_for_project_in_current_directory();
             }
-            RepositoryCommands::Add(add_repo) => {
-                repositories::add_repository_url_to_config(&add_repo.repository);
+            Commands::List(_) => {
+                projects::list_projects_in_projects_directory(&config);
             }
-            RepositoryCommands::Remove(remove_repo) => {
-                repositories::remove_repository_url_from_config(&remove_repo.repository);
+            Commands::Execute(execute_args) => {
+                projects::execute_in_current_project(&config, &execute_args);
             }
-            RepositoryCommands::List(_) => {
-                repositories::list_version_repositories();
+            Commands::Go(go_args) => {
+                projects::get_project_path(&config, &go_args);
             }
-            RepositoryCommands::Go(_) => {
-                println!(
-                    "{}",
-                    repositories::get_repositories_directory().to_str().unwrap()
-                );
+            Commands::Completions(completions_args) => {
+                projects::get_shell_completions(&completions_args)
             }
-            RepositoryCommands::New(new_repo) => {
-                repositories::create_new_repository(&new_repo.name);
+            Commands::Aliases(_) => {
+                shell::log_shell_aliases();
             }
-        },
+            Commands::Find(find_args) => {
+                projects::find_project_in_projects_directory(&config, &find_args.project)
+            }
+            Commands::Edit(_) => {
+                projects::open_editor(&config);
+            }
+            Commands::Update(_) => {
+                update::update().unwrap();
+            }
+            Commands::Repo(repo) => match &repo.command {
+                RepositoryCommands::Sync(_) => {
+                    repositories::sync_version_repositories();
+                }
+                RepositoryCommands::Add(add_repo) => {
+                    repositories::add_repository_url_to_config(&add_repo.repository);
+                }
+                RepositoryCommands::Remove(remove_repo) => {
+                    repositories::remove_repository_url_from_config(&remove_repo.repository);
+                }
+                RepositoryCommands::List(_) => {
+                    repositories::list_version_repositories();
+                }
+                RepositoryCommands::Go(_) => {
+                    println!(
+                        "{}",
+                        repositories::get_repositories_directory().to_str().unwrap()
+                    );
+                }
+                RepositoryCommands::New(new_repo) => {
+                    repositories::create_new_repository(&new_repo.name);
+                }
+            },
+        }
+    } else {
+        projects::get_info_for_project_in_current_directory();
     }
 }

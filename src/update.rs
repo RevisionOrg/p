@@ -18,6 +18,7 @@ pub fn update() -> Result<(), Box<dyn (::std::error::Error)>> {
 
     if status.updated() {
         println!("Updated to version {}!", status.version());
+        println!("Don't forget to update your shell aliases and shell completions, if you use them.");
     } else {
         println!("Already up to date");
     }

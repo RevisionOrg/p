@@ -12,7 +12,7 @@ dirs = "5.0.0"
 openssl = { version = "0.10.47", optional = true }
 predicates = "3.0.1"
 regex = "1.7.1"
-reqwest = "0.11.14"
+reqwest = "0.11.15"
 self_update = { version = "0.36.0", features = ["archive-tar", "compression-flate2"] }
 serde = { version = "1.0.158", features = ["derive"] }
 shellexpand = "3.0.0"

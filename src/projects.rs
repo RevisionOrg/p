@@ -188,16 +188,30 @@ pub fn find_project_in_projects_directory(config: &Config, project_name: &str) {
     }
 }
 
-pub fn open_editor(config: &Config) {
-    let editor = config.editor.clone();
+pub fn open_editor(config: &Config, editor: &Option<String>, detach: bool) {
+    let editor = match editor.to_owned() {
+        Some(editor) => Some(editor),
+        None => config.editor.clone(),
+    };
 
     if editor.clone().is_none() {
         println!(
-            "No editor set. Please set your preferred code editor or IDE in your config file."
+            "No editor set. Please set your preferred code editor or IDE in your config file. Or specify an editor with the --editor flag."
         );
         return;
     }
 
+    // If the detach flag is set, run the editor in the background
+    if detach {
+        std::process::Command::new("sh")
+            .arg("-c")
+            .arg(editor.unwrap())
+            .spawn()
+            .expect("Error: Failed to run editor");
+        return;
+    }
+
+    // Otherwise, run the editor in the foreground
     std::process::Command::new("sh")
         .arg("-c")
         .arg(editor.unwrap())
@@ -205,4 +219,5 @@ pub fn open_editor(config: &Config) {
         .expect("Error: Failed to run editor")
         .wait()
         .expect("Error: Editor returned a non-zero status");
+
 }

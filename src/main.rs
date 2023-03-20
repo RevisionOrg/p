@@ -55,7 +55,13 @@ pub struct ListArgs {}
 pub struct RepoSyncArgs {}
 
 #[derive(Args)]
-pub struct EditArgs {}
+pub struct EditArgs {
+    #[clap(short, long)]
+    editor: Option<String>,
+
+    #[clap(short, long)]
+    detach: bool,
+}
 
 #[derive(Args)]
 pub struct ExecuteArgs {
@@ -122,8 +128,12 @@ fn main() {
             Commands::Find(find_args) => {
                 projects::find_project_in_projects_directory(&config, &find_args.project)
             }
-            Commands::Edit(_) => {
-                projects::open_editor(&config);
+            Commands::Edit(edit_args) => {
+                if edit_args.detach {
+                    projects::open_editor(&config, &edit_args.editor, true);
+                } else {
+                    projects::open_editor(&config, &edit_args.editor, false);
+                }
             }
             Commands::Update(_) => {
                 update::update().unwrap();

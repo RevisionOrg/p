@@ -60,7 +60,8 @@ Set Height 800
 Set TypingSpeed 150ms
 
 Type "# p is a simple project management tool" Sleep 2s  Enter
-Type "p list" Sleep 1s  Enter  Sleep 3s
-Type "cd $(p go p)" Sleep 1s  Enter Sleep 3s
-Type "p info" Sleep 2s  Enter  Sleep 3s
-Type "p execute" Sleep 2s  Enter  Sleep 3s
+Type "p list" Sleep 1s  Enter  Sleep 2s
+Type "p find p" Sleep 1s  Enter  Sleep 2s
+Type "cd $(p go p)" Sleep 1s  Enter Sleep 2s
+Type "p info" Sleep 1.5s  Enter  Sleep 2s
+Type "p execute" Sleep 1.5s  Enter  Sleep 3s

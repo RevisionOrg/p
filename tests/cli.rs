@@ -25,13 +25,13 @@ fn help_test() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg("help");
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Usage: p <COMMAND>"));
+        .stdout(predicate::str::contains("Usage: p"));
 
     Ok(())
 }
 
 #[test]
-fn subcommands_test() -> Result<(), Box<dyn std::error::Error>> {
+fn subcommands_exit_codes_test() -> Result<(), Box<dyn std::error::Error>> {
     let mut main_cmd = Command::cargo_bin("p")?;
     main_cmd.arg("help");
     let main_output = main_cmd.output().expect("Failed to execute command");

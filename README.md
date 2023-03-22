@@ -1,4 +1,4 @@
-# p - Project Management Tool for the Command Line
+# p
 p is a simple project management tool for the command line written in Rust
 
 ## Demo

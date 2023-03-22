@@ -5,7 +5,7 @@ p is a simple project management tool for the command line written in Rust
 ![p demo](./examples/demo/demo.gif)
 
 ## Availability
-p is available for macOS and Linux. If you're using Windows, use WLS.
+p is available for macOS and Linux. If you're using Windows, use WSL.
 
 ## Installation
 Download the binary from the latest release and install it.

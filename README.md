@@ -14,7 +14,7 @@ Download the binary from the latest release and install it.
 All configuration is done in the ~/.p/ directory, which gets created when you run p for the first time. The central configuration file is ~/.p/config.toml.
 
 ## User Configuration
-The following is the TOML configuration for p, located at ~/.p/config.toml.
+The following is the schema for the TOML configuration file, located at ~/.p/config.toml.
 
 ```Rust
 pub struct UserConfigSchema {
@@ -25,13 +25,13 @@ pub struct UserConfigSchema {
 }
 ```
 
-`projects_dir`: The directory where all your projects are stored.
-`project_management_tool`: The default project management tool used by p.
-`version_repositories`: Optional. A list of external version repositories.
-`editor`: Otional. The default text editor used by p.
+`projects_dir`: The directory where all your projects are stored.<br/>
+`project_management_tool`: The default project management tool used by p.<br/>
+`version_repositories`: Optional. A list of external version repositories.<br/>
+`editor`: Optional. The default text editor used by p.<br/>
 
 ## Version Configuration
-p treats each project as if it has its own 'version'. Versions are configurations that specify what kind of project it is and how to handle it. Versions are stored in ~/.p/versions/. To create a new version, create a new file in ~/.p/versions/. The file should contain a valid TOML configuration. The following is the TOML configuration schema for version:
+p treats each project as if it has its own 'version'. Versions are configurations that specify what kind of project it is and how to handle it. Versions are stored in ~/.p/versions/. To create a new version, create a new file in ~/.p/versions/. The file should contain a valid TOML configuration. The following is the TOML configuration schema for a version:
 
 ```Rust
 pub struct VersionConfigSchema {
@@ -44,12 +44,12 @@ pub struct VersionConfigSchema {
 }
 ```
 
-`version`: The name of the version.
-`description`: A short description of the version.
-`files_needed`: A list of files that the version needs.
-`directories_needed`: A list of directories
-`specificity`: The specificity of the version. The higher the number, the more specific the version is. For example, if you have a version for a Rust project and a version for a Rust project with a Cargo.toml file, the version with the Cargo.toml file should have a higher specificity.
-`project_management_tool`: Optional. The project management tool used by p for this version.
+`version`: The name of the version.<br/>
+`description`: A short description of the version.<br/>
+`files_needed`: A list of files that the version needs.<br/>
+`directories_needed`: A list of directories.<br/>
+`specificity`: The specificity of the version. The higher the number, the more specific the version is. For example, if you have a version for a Rust project and a version for a Rust project with a Cargo.toml file, the version with the Cargo.toml file should have a higher specificity.<br/>
+`project_management_tool`: Optional. The project management tool used by p for this version.<br/>
 
 ## External Version Repositories
 p supports external version repositories.

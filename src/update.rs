@@ -13,8 +13,23 @@ pub fn update() -> Result<(), Box<dyn (::std::error::Error)>> {
         .bin_name("p")
         .show_download_progress(true)
         .current_version(cargo_crate_version!())
-        .build()?
-        .update()?;
+        .build().unwrap_or_else(|e| {
+            println!("Error: {}", e);
+            std::process::exit(1);
+        })
+        .update().unwrap_or_else(|e| {
+            // If it is a permission denied error, suggest to run as sudo
+            if let self_update::errors::Error::Io(e) = &e {
+                if e.kind() == ::std::io::ErrorKind::PermissionDenied {
+                    println!("Permission denied while installing update. Try running the command as sudo.");
+                    std::process::exit(1);
+                }
+            } else {
+                println!("Error: {}", e);
+            }
+
+            std::process::exit(1);
+        });
 
     if status.updated() {
         println!("Updated to version {}!", status.version());

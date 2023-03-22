@@ -5,7 +5,7 @@ use colored::Colorize;
 use simsearch::SimSearch;
 
 use crate::Shell;
-use crate::{config::Config, versions, Cli, CompletionsArgs, ExecuteArgs, GoArgs};
+use crate::{config::UserConfigSchema, versions, Cli, CompletionsArgs, ExecuteArgs, GoArgs};
 
 pub fn get_info_for_project_in_directory(directory: &str) {
     let parsed_directory = std::path::PathBuf::from(directory);
@@ -49,7 +49,7 @@ pub fn get_info_for_project_in_directory(directory: &str) {
     }
 }
 
-pub fn list_projects_in_projects_directory(config: &Config) {
+pub fn list_projects_in_projects_directory(config: &UserConfigSchema) {
     let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
     let projects = std::fs::read_dir(&projects_dir)
         .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
@@ -89,7 +89,7 @@ pub fn list_projects_in_projects_directory(config: &Config) {
     }
 }
 
-pub fn execute_in_current_project(config: &Config, execute_args: &ExecuteArgs) {
+pub fn execute_in_current_project(config: &UserConfigSchema, execute_args: &ExecuteArgs) {
     let project_version = &versions::get_current_directory_versions()[0];
     let project_management_tool = match &project_version.project_management_tool {
         Some(project_management_tool) => project_management_tool,
@@ -105,7 +105,7 @@ pub fn execute_in_current_project(config: &Config, execute_args: &ExecuteArgs) {
         .expect("Error executing command in current project");
 }
 
-pub fn get_project_path(config: &Config, go_args: &GoArgs) {
+pub fn get_project_path(config: &UserConfigSchema, go_args: &GoArgs) {
     let mut project_path_string = shellexpand::tilde(&config.projects_dir).into_owned();
     project_path_string.push_str("/");
     project_path_string.push_str(&go_args.project);
@@ -139,7 +139,7 @@ pub fn get_shell_completions(completions_args: &CompletionsArgs) {
     }
 }
 
-pub fn find_project_in_projects_directory(config: &Config, project_name: &str) {
+pub fn find_project_in_projects_directory(config: &UserConfigSchema, project_name: &str) {
     let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
     let projects = std::fs::read_dir(&projects_dir)
         .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
@@ -189,7 +189,7 @@ pub fn find_project_in_projects_directory(config: &Config, project_name: &str) {
     }
 }
 
-pub fn open_editor(config: &Config, editor: &Option<String>, detach: bool) {
+pub fn open_editor(config: &UserConfigSchema, editor: &Option<String>, detach: bool) {
     let editor = match editor.to_owned() {
         Some(editor) => Some(editor),
         None => config.editor.clone(),
@@ -220,5 +220,4 @@ pub fn open_editor(config: &Config, editor: &Option<String>, detach: bool) {
         .expect("Error: Failed to run editor")
         .wait()
         .expect("Error: Editor returned a non-zero status");
-
 }

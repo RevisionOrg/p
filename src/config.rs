@@ -3,22 +3,23 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
-pub struct Config {
+pub struct UserConfigSchema {
     pub projects_dir: String,
     pub project_management_tool: String,
     pub version_repositories: Option<Vec<String>>,
-    pub editor: Option<String>
+    pub editor: Option<String>,
 }
 
-pub fn read_config() -> Config {
+pub fn read_config() -> UserConfigSchema {
     let config_path = get_config_path();
     let config_content = std::fs::read_to_string(config_path).expect("Unable to read config file");
-    let config_parsed: Config = toml::from_str(&config_content).expect("Invalid config file");
+    let config_parsed: UserConfigSchema =
+        toml::from_str(&config_content).expect("Invalid config file");
 
     config_parsed
 }
 
-pub fn write_config(config: Config) {
+pub fn write_config(config: UserConfigSchema) {
     let config_path = get_config_path();
     let config_content = toml::to_string(&config).expect("Unable to convert config to TOML");
 

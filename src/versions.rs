@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use crate::{config::get_config_directory, repositories};
 
 #[derive(Deserialize, Serialize)]
-pub struct VersionConfig {
+pub struct VersionConfigSchema {
     pub version: String,
     pub description: String,
     pub files_needed: Vec<String>,
@@ -25,21 +25,21 @@ pub fn get_versions_directory() -> PathBuf {
     versions_directory
 }
 
-pub fn get_current_directory_versions() -> Vec<VersionConfig> {
+pub fn get_current_directory_versions() -> Vec<VersionConfigSchema> {
     let current_directory = std::env::current_dir().expect("Unable to get current directory");
     let directory_versions = get_directory_versions(&current_directory);
 
     directory_versions
 }
 
-pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
+pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfigSchema> {
     let versions_directory = get_versions_directory();
     let versions_configs = std::fs::read_dir(versions_directory)
         .expect("Unable to read versions directory")
         .filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
     let external_versions_configs = repositories::get_repositories_configs();
     let all_versions_configs = versions_configs.chain(external_versions_configs);
-    let mut directory_versions: Vec<VersionConfig> = vec![];
+    let mut directory_versions: Vec<VersionConfigSchema> = vec![];
 
     // Loop through all known versions configs to find which ones match the current directory
     for version_config in all_versions_configs {
@@ -49,7 +49,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
                 .path(),
         )
         .expect("Unable to read version config content");
-        let version_config_parsed: VersionConfig = toml::from_str(&version_config_content)
+        let version_config_parsed: VersionConfigSchema = toml::from_str(&version_config_content)
             .expect("Unable to convert version config to TOML");
 
         let mut files_needed = version_config_parsed.files_needed.clone();
@@ -86,7 +86,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
 
     // Show arbitrary "Unknown" version if no version is found
     if directory_versions.len() == 0 {
-        directory_versions.push(VersionConfig {
+        directory_versions.push(VersionConfigSchema {
             version: "Unknown".to_string(),
             description: "Unknown version".to_string(),
             files_needed: vec![],
@@ -103,7 +103,7 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfig> {
     }
 }
 
-pub fn sort_versions_by_specificity(versions: Vec<VersionConfig>) -> Vec<VersionConfig> {
+pub fn sort_versions_by_specificity(versions: Vec<VersionConfigSchema>) -> Vec<VersionConfigSchema> {
     let mut sorted_versions = versions;
 
     sorted_versions.sort_by(|a, b| b.specificity.cmp(&a.specificity));
@@ -114,7 +114,7 @@ pub fn create_sample_version_in_versions_directory() {
     let mut versions_path = get_versions_directory();
     versions_path.push("rust.toml");
 
-    let version_config = VersionConfig {
+    let version_config = VersionConfigSchema {
         version: "Rust".to_string(),
         description: "A Rust project".to_string(),
         files_needed: vec!["Cargo.toml".to_string()],

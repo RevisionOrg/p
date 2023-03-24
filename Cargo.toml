@@ -9,7 +9,7 @@ clap = { version = "4.1.13", features = ["derive"] }
 clap_complete = "4.1.5"
 colored = "2.0.0"
 dirs = "5.0.0"
-openssl = { version = "0.10.47", optional = true }
+openssl = { version = "0.10.48", optional = true }
 predicates = "3.0.1"
 regex = "1.7.2"
 reqwest = "0.11.15"

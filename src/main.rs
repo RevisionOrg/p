@@ -79,6 +79,12 @@ pub struct GoArgs {
 #[derive(Args)]
 pub struct FindArgs {
     project: String,
+
+    #[clap(short, long)]
+    compact: bool,
+
+    #[clap(short, long)]
+    amount: Option<usize>,
 }
 
 #[derive(Args)]
@@ -134,7 +140,7 @@ fn main() {
                 shell::log_shell_aliases();
             }
             Commands::Find(find_args) => {
-                projects::find_project_in_projects_directory(&config, &find_args.project)
+                projects::find_project_in_projects_directory(&config, &find_args)
             }
             Commands::Edit(edit_args) => {
                 if edit_args.detach {

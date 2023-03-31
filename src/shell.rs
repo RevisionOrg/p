@@ -19,6 +19,9 @@ pi() {
 pf() {
     p find "$@"
 }
+pfg() {
+    pg "$(p find "$@")"
+}
     "#;
     let zsh_shell_aliases = r#"
 pg() {
@@ -39,6 +42,10 @@ pi() {
 pf() {
     p find "$@"
 }
+pfg() {
+    pg "$(p find "$@")"
+}
+
     "#;
 
     let mut shell_aliases = String::new();

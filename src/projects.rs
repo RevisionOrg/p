@@ -4,8 +4,8 @@ use clap_complete::Shell::{Bash, Zsh};
 use colored::Colorize;
 use simsearch::SimSearch;
 
-use crate::Shell;
 use crate::{config::UserConfigSchema, versions, Cli, CompletionsArgs, ExecuteArgs, GoArgs};
+use crate::{FindArgs, Shell};
 
 pub fn get_info_for_project_in_directory(directory: &str) {
     let parsed_directory = std::path::PathBuf::from(directory);
@@ -139,13 +139,19 @@ pub fn get_shell_completions(completions_args: &CompletionsArgs) {
     }
 }
 
-pub fn find_project_in_projects_directory(config: &UserConfigSchema, project_name: &str) {
+pub fn find_project_in_projects_directory(config: &UserConfigSchema, command_config: &FindArgs) {
     let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
     let projects = std::fs::read_dir(&projects_dir)
         .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
     let mut engine: SimSearch<u32> = SimSearch::new();
     let mut engine_insert_index = 0;
     let mut project_names: Vec<String> = Vec::new();
+    let project_name = &command_config.project.to_owned();
+    let compact = &command_config.compact.to_owned();
+    let amount = match &command_config.amount {
+        Some(amount) => amount.to_owned(),
+        None => 5,
+    };
 
     for project in projects {
         let project = project.expect("Unable to read project");
@@ -173,16 +179,21 @@ pub fn find_project_in_projects_directory(config: &UserConfigSchema, project_nam
         return;
     }
 
-    let top_five_project_search_results =
-        project_search_result.iter().take(5).collect::<Vec<&u32>>();
+    if !compact {
+        println!(
+            "{}",
+            format!("Search results for \"{}\":", project_name)
+                .bold()
+                .underline()
+        );
+    }
 
-    println!(
-        "{}",
-        format!("Search results for \"{}\":", project_name)
-            .bold()
-            .underline()
-    );
-    for project_search_result_index in top_five_project_search_results {
+    let top_project_search_results = project_search_result
+        .iter()
+        .take(amount)
+        .collect::<Vec<&u32>>();
+
+    for project_search_result_index in top_project_search_results {
         let project_at_index = &project_names[*project_search_result_index as usize];
 
         println!("{}", project_at_index);
@@ -199,6 +210,7 @@ pub fn open_editor(config: &UserConfigSchema, editor: &Option<String>, detach: b
         println!(
             "No editor set. Please set your preferred code editor or IDE in your config file. Or specify an editor with the --editor flag."
         );
+
         return;
     }
 
@@ -209,6 +221,7 @@ pub fn open_editor(config: &UserConfigSchema, editor: &Option<String>, detach: b
             .arg(editor.unwrap())
             .spawn()
             .expect("Error: Failed to run editor");
+
         return;
     }
 

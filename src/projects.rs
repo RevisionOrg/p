@@ -34,7 +34,7 @@ pub fn get_project_for_directory(custom_directory: Option<&str>) -> Option<Proje
         .unwrap()
         .components()
         .next()
-        .expect("Unable to get project directory. Is this a project?")
+        .expect("Could not get a project in the given directory")
         .as_os_str()
         .to_str()
         .unwrap();
@@ -48,7 +48,7 @@ pub fn get_project_for_directory(custom_directory: Option<&str>) -> Option<Proje
 
 pub fn get_info_for_project_in_directory(directory: Option<&str>) {
     let current_project =
-        get_project_for_directory(directory).expect("Unable to get current project");
+        get_project_for_directory(directory).expect("Could not get a project in the given directory");
 
     println!(
         "{}",
@@ -121,7 +121,7 @@ pub fn list_projects_in_projects_directory(config: &UserConfigSchema) {
 }
 
 pub fn execute_in_current_project(config: &UserConfigSchema, execute_args: &ExecuteArgs) {
-    let project = get_project_for_directory(None).expect("Unable to get current project");
+    let project = get_project_for_directory(None).expect("Could not get a project in the given directory");
     let project_version = &project.versions[0];
     let project_management_tool = match &project_version.project_management_tool {
         Some(project_management_tool) => project_management_tool,

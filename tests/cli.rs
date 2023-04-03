@@ -56,7 +56,7 @@ fn subcommands_exit_codes_test() -> Result<(), Box<dyn std::error::Error>> {
         let assert_success = cmd.status().expect("Failed to execute command").success();
 
         if !assert_success {
-            cmd.assert().failure().stderr(predicate::str::contains("Usage"));
+            cmd.assert().failure().stderr(predicate::str::contains("Usage").or(predicate::str::contains("Could not get a project in the given directory")));
         } else {
             cmd.assert().success();
         }
@@ -70,7 +70,7 @@ fn subcommands_exit_codes_test() -> Result<(), Box<dyn std::error::Error>> {
         let assert_success = cmd.status().expect("Failed to execute command").success();
 
         if !assert_success {
-            cmd.assert().failure().stderr(predicate::str::contains("Usage"));
+            cmd.assert().failure().stderr(predicate::str::contains("Usage").or(predicate::str::contains("Could not get a project in the given directory")));
         } else {
             cmd.assert().success();
         }

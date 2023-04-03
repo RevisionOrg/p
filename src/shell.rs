@@ -20,9 +20,9 @@ pf() {
     p find "$@"
 }
 pfg() {
-    pg "$(p find "$@")"
+    pg "$(p find -c -a 1 "$@")"
 }
-    "#;
+"#;
     let zsh_shell_aliases = r#"
 pg() {
     cd $(p go $1)
@@ -43,9 +43,8 @@ pf() {
     p find "$@"
 }
 pfg() {
-    pg "$(p find "$@")"
+    pg "$(p find -c -a 1 "$@")"
 }
-
     "#;
 
     let mut shell_aliases = String::new();

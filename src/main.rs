@@ -117,12 +117,9 @@ fn main() {
     if cli.command.is_some() {
         match &cli.command.unwrap() {
             Commands::Info(info_args) => {
-                let directory = match &info_args.directory {
-                    Some(directory) => directory,
-                    None => ".",
-                };
+                let directory = info_args.directory.as_ref().map(|s| s.as_str());
 
-                projects::get_info_for_project_in_directory(&directory);
+                projects::get_info_for_project_in_directory(directory);
             }
             Commands::List(_) => {
                 projects::list_projects_in_projects_directory(&config);
@@ -144,9 +141,9 @@ fn main() {
             }
             Commands::Edit(edit_args) => {
                 if edit_args.detach {
-                    projects::open_editor(&config, &edit_args.editor, true);
+                    projects::open_editor_in_current_project(&config, &edit_args.editor, true);
                 } else {
-                    projects::open_editor(&config, &edit_args.editor, false);
+                    projects::open_editor_in_current_project(&config, &edit_args.editor, false);
                 }
             }
             Commands::Update(_) => {
@@ -177,6 +174,6 @@ fn main() {
             },
         }
     } else {
-        projects::get_info_for_project_in_directory(".");
+        projects::get_info_for_project_in_directory(None);
     }
 }

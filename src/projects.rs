@@ -1,15 +1,54 @@
+use std::path::PathBuf;
+
 use clap::CommandFactory;
 use clap_complete::generate;
 use clap_complete::Shell::{Bash, Zsh};
 use colored::Colorize;
 use simsearch::SimSearch;
 
+use crate::versions::VersionConfigSchema;
+use crate::{config, FindArgs, Shell};
 use crate::{config::UserConfigSchema, versions, Cli, CompletionsArgs, ExecuteArgs, GoArgs};
-use crate::{FindArgs, Shell};
 
-pub fn get_info_for_project_in_directory(directory: &str) {
-    let parsed_directory = std::path::PathBuf::from(directory);
-    let directory_versions = versions::get_directory_versions(&parsed_directory);
+pub struct Project {
+    versions: Vec<VersionConfigSchema>,
+    root: PathBuf,
+    name: String,
+}
+
+pub fn get_project_for_directory(custom_directory: Option<&str>) -> Option<Project> {
+    let user_config = config::read_config();
+    let projects_directory =
+        std::path::PathBuf::from(shellexpand::tilde(&user_config.projects_dir).into_owned());
+    let current_directory = match custom_directory {
+        Some(custom_directory) => std::path::PathBuf::from(custom_directory),
+        None => std::env::current_dir().unwrap(),
+    };
+
+    if !current_directory.starts_with(&projects_directory) {
+        return None;
+    }
+
+    let project_directory = current_directory
+        .strip_prefix(&projects_directory)
+        .unwrap()
+        .components()
+        .next()
+        .expect("Unable to get project directory. Is this a project?")
+        .as_os_str()
+        .to_str()
+        .unwrap();
+
+    Some(Project {
+        versions: versions::get_directory_versions(&projects_directory.join(project_directory)),
+        root: projects_directory.join(project_directory),
+        name: project_directory.to_string(),
+    })
+}
+
+pub fn get_info_for_project_in_directory(directory: Option<&str>) {
+    let current_project =
+        get_project_for_directory(directory).expect("Unable to get current project");
 
     println!(
         "{}",
@@ -25,27 +64,20 @@ pub fn get_info_for_project_in_directory(directory: &str) {
         .bold()
         .underline()
     );
-    if directory_versions.len() > 1 {
+    if current_project.versions.len() > 1 {
         println!(
             "{}",
-            format!("{} Versions:", directory_versions.len()).bold()
+            format!("{} Versions:", current_project.versions.len()).bold()
         );
-        for version in directory_versions {
+        for version in current_project.versions {
             println!("{} - {}", version.version, version.description);
         }
     } else {
         println!(
             "{}",
-            format!(
-                "Version: {}",
-                versions::get_directory_versions(&parsed_directory)[0].version
-            )
-            .bold()
+            format!("Version: {}", current_project.versions[0].version).bold()
         );
-        println!(
-            "{}",
-            versions::get_directory_versions(&parsed_directory)[0].description
-        );
+        println!("{}", current_project.versions[0].description);
     }
 }
 
@@ -69,34 +101,35 @@ pub fn list_projects_in_projects_directory(config: &UserConfigSchema) {
     println!("{}", projects_string.bold().underline());
     println!();
 
-    for project in projects {
-        let project = project.expect("Unable to read project");
-        let project_path = project.path();
+    for projects_subdirectory in projects {
+        let projects_subdirectory = &projects_subdirectory.unwrap();
 
-        if project_path.is_dir() {
-            let project_name = project_path.file_name().unwrap().to_str().unwrap();
-            let project_versions_string;
-            let project_versions = versions::get_directory_versions(&project_path);
-
-            project_versions_string = project_versions
+        if projects_subdirectory.path().is_dir() {
+            let project =
+                get_project_for_directory(Some(projects_subdirectory.path().to_str().unwrap()))
+                    .unwrap();
+            let project_versions_string = project
+                .versions
                 .iter()
                 .map(|version| version.version.clone())
                 .collect::<Vec<String>>()
                 .join(", ");
 
-            println!("{} ({})", project_name.bold(), project_versions_string);
+            println!("{} ({})", project.name.bold(), project_versions_string);
         }
     }
 }
 
 pub fn execute_in_current_project(config: &UserConfigSchema, execute_args: &ExecuteArgs) {
-    let project_version = &versions::get_current_directory_versions()[0];
+    let project = get_project_for_directory(None).expect("Unable to get current project");
+    let project_version = &project.versions[0];
     let project_management_tool = match &project_version.project_management_tool {
         Some(project_management_tool) => project_management_tool,
         None => &config.project_management_tool,
     };
     let mut command = std::process::Command::new(&project_management_tool);
 
+    command.current_dir(&project.root);
     command.args(&execute_args.arguments);
     command
         .spawn()
@@ -200,7 +233,11 @@ pub fn find_project_in_projects_directory(config: &UserConfigSchema, command_con
     }
 }
 
-pub fn open_editor(config: &UserConfigSchema, editor: &Option<String>, detach: bool) {
+pub fn open_editor_in_current_project(
+    config: &UserConfigSchema,
+    editor: &Option<String>,
+    detach: bool,
+) {
     let editor = match editor.to_owned() {
         Some(editor) => Some(editor),
         None => config.editor.clone(),

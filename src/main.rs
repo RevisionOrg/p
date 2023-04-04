@@ -47,6 +47,7 @@ enum Commands {
 
 #[derive(Args)]
 pub struct InfoArgs {
+    /// Which directory to get information of
     #[clap(short, long)]
     directory: Option<String>,
 }
@@ -59,36 +60,44 @@ pub struct RepoSyncArgs {}
 
 #[derive(Args)]
 pub struct EditArgs {
+    /// Path of the editor to use
     #[clap(short, long)]
     editor: Option<String>,
 
+    /// Run editor in a detached process
     #[clap(short, long)]
     detach: bool,
 }
 
 #[derive(Args)]
 pub struct ExecuteArgs {
+    /// Execution arguments
     arguments: Vec<String>,
 }
 
 #[derive(Args)]
 pub struct GoArgs {
+    /// Name of the project
     project: String,
 }
 
 #[derive(Args)]
 pub struct FindArgs {
+    /// Name of the project
     project: String,
 
+    /// Only show minimal output
     #[clap(short, long)]
     compact: bool,
 
+    /// Amount of results to display
     #[clap(short, long)]
     amount: Option<usize>,
 }
 
 #[derive(Args)]
 pub struct CompletionsArgs {
+    /// Name of the shell
     shell: Option<Shell>,
 }
 

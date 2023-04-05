@@ -4,8 +4,11 @@ A simple project management tool for the command line written in Rust.
 
 ## Demo
 ![p demo](./assets/demo/demo.gif)
+<small>Note: All of these commands have even shorter aliases. You can get the aliases for your shell via `p aliases SHELL`</small>
 
+## Table of Contents
 - [Demo](#demo)
+- [Table of Contents](#table-of-contents)
 - [Availability](#availability)
 - [Installation](#installation)
 - [Configuration](#configuration)

@@ -1,21 +1,21 @@
-# p
-p is a simple project management tool for the command line written in Rust
+<img src="./assets/logo.png" width="25" style="margin-bottom: 5px">
+
+A simple project management tool for the command line written in Rust.
 
 ## Demo
-![p demo](./examples/demo/demo.gif)
+![p demo](./assets/demo/demo.gif)
 
-- [p](#p)
-  - [Demo](#demo)
-  - [Availability](#availability)
-  - [Installation](#installation)
-  - [Configuration](#configuration)
-  - [User Configuration](#user-configuration)
-  - [Version Configuration](#version-configuration)
-  - [External Version Repositories](#external-version-repositories)
-    - [Adding an External Version Repository](#adding-an-external-version-repository)
-    - [Syncing External Version Repositories](#syncing-external-version-repositories)
-    - [Removing an External Version Repository](#removing-an-external-version-repository)
-    - [Creating a Version Repository](#creating-a-version-repository)
+- [Demo](#demo)
+- [Availability](#availability)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [User Configuration](#user-configuration)
+- [Version Configuration](#version-configuration)
+- [External Version Repositories](#external-version-repositories)
+  - [Adding an External Version Repository](#adding-an-external-version-repository)
+  - [Syncing External Version Repositories](#syncing-external-version-repositories)
+  - [Removing an External Version Repository](#removing-an-external-version-repository)
+  - [Creating a Version Repository](#creating-a-version-repository)
 
 ## Availability
 p is available for macOS and Linux. If you're using Windows, use WSL.

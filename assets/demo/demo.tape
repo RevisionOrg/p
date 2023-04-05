@@ -57,9 +57,8 @@ Set Theme "Monokai Vivid"
 Set FontSize 22
 Set Width 1200
 Set Height 800
-Set TypingSpeed 150ms
+Set TypingSpeed 250ms
 
-Type "# p is a simple project management tool" Sleep 2s  Enter
 Type "p list" Sleep 1s  Enter  Sleep 2s
 Type "p find p" Sleep 1s  Enter  Sleep 2s
 Type "cd $(p go p)" Sleep 1s  Enter Sleep 2s

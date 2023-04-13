@@ -10,7 +10,7 @@ clap_complete = "4.1.5"
 colored = "2.0.0"
 dirs = "5.0.0"
 openssl = { version = "0.10.50", optional = true }
-predicates = "3.0.2"
+predicates = "3.0.3"
 regex = "1.7.3"
 reqwest = "0.11.16"
 self_update = { version = "0.36.0", features = ["archive-tar", "compression-flate2"] }

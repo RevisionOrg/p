@@ -17,7 +17,7 @@ self_update = { version = "0.36.0", features = ["archive-tar", "compression-flat
 serde = { version = "1.0.166", features = ["derive"] }
 shellexpand = "3.0.0"
 simsearch = "0.2.4"
-tempfile = "3.4.0"
+tempfile = "3.6.0"
 toml = "0.7.6"
 
 [profile.release]

@@ -11,7 +11,7 @@ colored = "2.0.4"
 dirs = "5.0.1"
 openssl = { version = "0.10.57", optional = true }
 predicates = "3.0.3"
-regex = "1.9.4"
+regex = "1.9.5"
 reqwest = "0.11.20"
 self_update = { version = "0.37.0", features = ["archive-tar", "compression-flate2"] }
 serde = { version = "1.0.188", features = ["derive"] }

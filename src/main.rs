@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, process::exit};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use repositories::{Repo, RepositoryCommands};
@@ -137,7 +137,14 @@ fn main() {
                 projects::execute_in_current_project(&config, &execute_args);
             }
             Commands::Go(go_args) => {
-                projects::get_project_path(&config, &go_args);
+                let project_path = projects::get_project_path(&config, &go_args);
+
+                if project_path.is_some() {
+                    println!("{}", project_path.unwrap().to_string());
+                } else {
+                    println!("Project {} does not exist", go_args.project);
+                    exit(1)
+                }
             }
             Commands::Completions(completions_args) => {
                 projects::get_shell_completions(&completions_args)
@@ -149,11 +156,11 @@ fn main() {
                 projects::find_project_in_projects_directory(&config, &find_args)
             }
             Commands::Edit(edit_args) => {
-                if edit_args.detach {
-                    projects::open_editor_in_current_project(&config, &edit_args.editor, true);
-                } else {
-                    projects::open_editor_in_current_project(&config, &edit_args.editor, false);
-                }
+                projects::open_editor_in_current_project(
+                    &config,
+                    &edit_args.editor,
+                    edit_args.detach,
+                );
             }
             Commands::Update(_) => {
                 update::update().unwrap();

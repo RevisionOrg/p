@@ -121,13 +121,32 @@ pub fn list_projects_in_projects_directory(config: &UserConfigSchema) {
 }
 
 pub fn execute_in_current_project(config: &UserConfigSchema, execute_args: &ExecuteArgs) {
-    let project =
-        get_project_for_directory(None).expect("Could not get a project in the given directory");
+    let project_result = get_project_for_directory(None);
+
+    let project = match project_result {
+        Some(project) => project,
+        None => {
+            println!("Could not find a project in the current directory");
+            return;
+        }
+    };
+
     let project_version = &project.versions[0];
+
     let project_management_tool = match &project_version.project_management_tool {
         Some(project_management_tool) => project_management_tool,
         None => &config.project_management_tool,
     };
+    let project_management_tool_path = std::path::Path::new(&project_management_tool);
+
+    if !project_management_tool_path.exists() {
+        println!(
+            "Project management tool {} not found",
+            project_management_tool
+        );
+        return;
+    }
+
     let mut command = std::process::Command::new(&project_management_tool);
 
     command.current_dir(&project.root);
@@ -139,18 +158,17 @@ pub fn execute_in_current_project(config: &UserConfigSchema, execute_args: &Exec
         .expect("Error executing command in current project");
 }
 
-pub fn get_project_path(config: &UserConfigSchema, go_args: &GoArgs) {
+pub fn get_project_path(config: &UserConfigSchema, go_args: &GoArgs) -> Option<String> {
     let mut project_path_string = shellexpand::tilde(&config.projects_dir).into_owned();
     project_path_string.push_str("/");
     project_path_string.push_str(&go_args.project);
 
     let project_path = std::path::Path::new(&project_path_string);
     if !project_path.exists() {
-        println!("Project {} does not exist", go_args.project);
-        return;
+        return None;
     }
 
-    println!("{}", project_path.to_str().unwrap());
+    return Some(project_path.to_str().unwrap().to_owned());
 }
 
 pub fn get_shell_completions(completions_args: &CompletionsArgs) {

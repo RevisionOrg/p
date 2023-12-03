@@ -36,7 +36,7 @@ jobs:
           profile: minimal
           override: true
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Cargo build
         uses: actions-rs/cargo@v1
         with:
@@ -63,7 +63,7 @@ jobs:
           profile: minimal
           override: true
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create projects directory
         run: mkdir ~/Projects
       - name: Cargo test

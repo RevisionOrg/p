@@ -163,7 +163,12 @@ fn main() {
                 );
             }
             Commands::Update(_) => {
-                update::update().unwrap();
+                let update_res = update::update();
+
+                if update_res.is_err() {
+                    println!("Failed to update p: {}", update_res.err().unwrap());
+                    exit(1);
+                }
             }
             Commands::Repo(repo) => match &repo.command {
                 RepositoryCommands::Sync(_) => {

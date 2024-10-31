@@ -1,7 +1,7 @@
-use assert_cmd::prelude::*; // Add methods on commands
-use predicates::prelude::*; // Used for writing assertions
-use std::process::Command; // Run programs
+use assert_cmd::prelude::*;
+use predicates::prelude::*;
 use regex::Regex;
+use std::process::Command;
 
 fn parse_help_string(help_str: &str) -> Vec<String> {
     let blacklisted_commands = vec!["help", "edit", "execute"];
@@ -56,7 +56,13 @@ fn subcommands_exit_codes_test() -> Result<(), Box<dyn std::error::Error>> {
         let assert_success = cmd.status().expect("Failed to execute command").success();
 
         if !assert_success {
-            cmd.assert().failure().stderr(predicate::str::contains("Usage").or(predicate::str::contains("Could not get a project in the given directory")));
+            cmd.assert()
+                .failure()
+                .stderr(
+                    predicate::str::contains("Usage").or(predicate::str::contains(
+                        "Could not get a project in the given directory",
+                    )),
+                );
         } else {
             cmd.assert().success();
         }
@@ -70,7 +76,13 @@ fn subcommands_exit_codes_test() -> Result<(), Box<dyn std::error::Error>> {
         let assert_success = cmd.status().expect("Failed to execute command").success();
 
         if !assert_success {
-            cmd.assert().failure().stderr(predicate::str::contains("Usage").or(predicate::str::contains("Could not get a project in the given directory")));
+            cmd.assert()
+                .failure()
+                .stderr(
+                    predicate::str::contains("Usage").or(predicate::str::contains(
+                        "Could not get a project in the given directory",
+                    )),
+                );
         } else {
             cmd.assert().success();
         }

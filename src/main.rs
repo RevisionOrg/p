@@ -37,7 +37,7 @@ enum Commands {
     /// Generate a shell completion script and print it to stdout
     Completions(CompletionsArgs),
     /// Get aliases for your shell (p execute -> px)
-    Aliases(CompletionsArgs),
+    Aliases(AliasArgs),
     /// Repository management
     Repo(Repo),
     /// Find a project
@@ -105,12 +105,21 @@ pub struct CompletionsArgs {
 }
 
 #[derive(Args)]
+pub struct AliasArgs {
+    /// Name of the shell
+    shell: Shell,
+}
+
+#[derive(Args)]
 pub struct UpdateArgs {}
 
 #[derive(ValueEnum, Copy, Clone)]
 pub enum Shell {
     Bash,
     Zsh,
+    Fish,
+    Powershell,
+    Elvish,
 }
 
 fn main() {
@@ -164,8 +173,8 @@ fn main() {
             Commands::Completions(completions_args) => {
                 projects::get_shell_completions(&completions_args)
             }
-            Commands::Aliases(_) => {
-                shell::log_shell_aliases();
+            Commands::Aliases(alias_args) => {
+                shell::log_shell_aliases(&alias_args);
             }
             Commands::Find(find_args) => {
                 projects::find_project_in_projects_directory(&config, &find_args)

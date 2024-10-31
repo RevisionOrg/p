@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::CommandFactory;
 use clap_complete::generate;
-use clap_complete::Shell::{Bash, Zsh};
+use clap_complete::Shell::{Bash, Elvish, Fish, PowerShell, Zsh};
 use colored::Colorize;
 use log::error;
 use simsearch::SimSearch;
@@ -188,7 +188,7 @@ pub fn get_project_path(config: &UserConfigSchema, go_args: &GoArgs) -> Option<S
 
 pub fn get_shell_completions(completions_args: &CompletionsArgs) {
     let mut cmd = Cli::command();
-    let available_shells = vec!["bash", "zsh"];
+    let available_shells = vec!["bash", "zsh", "fish", "powershell", "elvish"];
     let shell = match completions_args.shell {
         Some(shell) => shell,
         None => {
@@ -203,6 +203,9 @@ pub fn get_shell_completions(completions_args: &CompletionsArgs) {
     match shell {
         Shell::Bash => generate(Bash, &mut cmd, "p", &mut std::io::stdout()),
         Shell::Zsh => generate(Zsh, &mut cmd, "p", &mut std::io::stdout()),
+        Shell::Fish => generate(Fish, &mut cmd, "p", &mut std::io::stdout()),
+        Shell::Powershell => generate(PowerShell, &mut cmd, "p", &mut std::io::stdout()),
+        Shell::Elvish => generate(Elvish, &mut cmd, "p", &mut std::io::stdout()),
     }
 }
 

@@ -4,21 +4,24 @@ version = "1.2.1"
 edition = "2021"
 
 [dependencies]
-assert_cmd = "2.0.12"
-clap = { version = "4.3.24", features = ["derive"] }
-clap_complete = "4.1.5"
+assert_cmd = "2.0.13"
+clap = { version = "4.4.18", features = ["derive"] }
+clap_complete = "4.4.10"
 colored = "2.0.4"
 dirs = "5.0.1"
-openssl = { version = "0.10.60", optional = true }
+openssl = { version = "0.10.63", optional = true }
 predicates = "3.0.4"
 regex = "1.9.6"
-reqwest = "0.11.22"
-self_update = { version = "0.37.0", features = ["archive-tar", "compression-flate2"] }
-serde = { version = "1.0.193", features = ["derive"] }
+reqwest = "0.12.9"
+self_update = { version = "0.41.0", features = [
+  "archive-tar",
+  "compression-flate2",
+] }
+serde = { version = "1.0.196", features = ["derive"] }
 shellexpand = "3.1.0"
 simsearch = "0.2.4"
-tempfile = "3.6.0"
-toml = "0.7.8"
+tempfile = "3.8.1"
+toml = "0.8.19"
 
 [profile.release]
 strip = true

@@ -7,6 +7,11 @@ in
   pkgs.mkShell rec {
     buildInputs = with pkgs; [
       rustup
+      webkitgtk
+      openssl
+    ];
+    nativeBuildInputs = with pkgs; [
+      pkg-config
     ];
     # Avoid polluting home dir with local project stuff.
     RUSTUP_HOME = toString ./.rustup;

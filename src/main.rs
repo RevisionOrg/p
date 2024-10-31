@@ -1,7 +1,10 @@
 use std::{env, process::exit};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use log::error;
 use repositories::{Repo, RepositoryCommands};
+
+use simplelog::*;
 
 pub mod config;
 pub mod projects;
@@ -111,6 +114,18 @@ pub enum Shell {
 }
 
 fn main() {
+    let log_config = ConfigBuilder::new()
+        .set_time_level(LevelFilter::Off)
+        .build();
+
+    CombinedLogger::init(vec![TermLogger::new(
+        LevelFilter::Warn,
+        log_config,
+        TerminalMode::Mixed,
+        ColorChoice::Auto,
+    )])
+    .unwrap();
+
     let config = config::read_config();
     let cli = Cli::parse();
 
@@ -142,7 +157,7 @@ fn main() {
                 if project_path.is_some() {
                     println!("{}", project_path.unwrap().to_string());
                 } else {
-                    println!("Project {} does not exist", go_args.project);
+                    error!("Project {} does not exist", go_args.project);
                     exit(1)
                 }
             }
@@ -166,7 +181,7 @@ fn main() {
                 let update_res = update::update();
 
                 if update_res.is_err() {
-                    println!("Failed to update p: {}", update_res.err().unwrap());
+                    error!("Failed to update p: {}", update_res.err().unwrap());
                     exit(1);
                 }
             }

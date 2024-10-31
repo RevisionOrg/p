@@ -1,3 +1,4 @@
+use log::error;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -11,18 +12,29 @@ pub struct UserConfigSchema {
 
 pub fn read_config() -> UserConfigSchema {
     let config_path = get_config_path();
-    let config_content = std::fs::read_to_string(config_path).expect("Unable to read config file");
-    let config_parsed: UserConfigSchema =
-        toml::from_str(&config_content).expect("Invalid config file");
+    let config_content = std::fs::read_to_string(config_path).unwrap_or_else(|_| {
+        error!("Unable to read config file");
+        std::process::exit(1)
+    });
+    let config_parsed: UserConfigSchema = toml::from_str(&config_content).unwrap_or_else(|_| {
+        error!("Invalid config file");
+        std::process::exit(1)
+    });
 
     config_parsed
 }
 
 pub fn write_config(config: UserConfigSchema) {
     let config_path = get_config_path();
-    let config_content = toml::to_string(&config).expect("Unable to convert config to TOML");
+    let config_content = toml::to_string(&config).unwrap_or_else(|_| {
+        error!("Unable to convert config to TOML");
+        std::process::exit(1)
+    });
 
-    std::fs::write(config_path, config_content).expect("Unable to write config file");
+    std::fs::write(config_path, config_content).unwrap_or_else(|_| {
+        error!("Unable to write config file");
+        std::process::exit(1)
+    });
 }
 
 pub fn get_config_directory() -> PathBuf {
@@ -59,6 +71,12 @@ projects_dir = "~/Projects"
 project_management_tool = "./project"
 "#;
 
-    std::fs::create_dir_all(&config_directory_path).expect("Unable to create config directory");
-    std::fs::write(&config_file_path, config_content).expect("Unable to write default config file");
+    std::fs::create_dir_all(&config_directory_path).unwrap_or_else(|_| {
+        error!("Unable to create config directory");
+        std::process::exit(1)
+    });
+    std::fs::write(&config_file_path, config_content).unwrap_or_else(|_| {
+        error!("Unable to write default config file");
+        std::process::exit(1)
+    });
 }

@@ -1,3 +1,4 @@
+use log::error;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -18,7 +19,10 @@ pub fn get_versions_directory() -> PathBuf {
     versions_directory.push("versions");
 
     if !versions_directory.exists() {
-        std::fs::create_dir_all(&versions_directory).expect("Unable to create versions directory");
+        std::fs::create_dir_all(&versions_directory).unwrap_or_else(|_| {
+            error!("Unable to create versions directory");
+            std::process::exit(1)
+        });
         create_sample_version_in_versions_directory();
     }
 
@@ -26,7 +30,10 @@ pub fn get_versions_directory() -> PathBuf {
 }
 
 pub fn get_current_directory_versions() -> Vec<VersionConfigSchema> {
-    let current_directory = std::env::current_dir().expect("Unable to get current directory");
+    let current_directory = std::env::current_dir().unwrap_or_else(|_| {
+        error!("Unable to get current directory");
+        std::process::exit(1)
+    });
     let directory_versions = get_directory_versions(&current_directory);
 
     directory_versions
@@ -35,7 +42,10 @@ pub fn get_current_directory_versions() -> Vec<VersionConfigSchema> {
 pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfigSchema> {
     let versions_directory = get_versions_directory();
     let versions_configs = std::fs::read_dir(versions_directory)
-        .expect("Unable to read versions directory")
+        .unwrap_or_else(|_| {
+            error!("Unable to read versions directory");
+            std::process::exit(1)
+        })
         .filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
     let external_versions_configs = repositories::get_repositories_configs();
     let all_versions_configs = versions_configs.chain(external_versions_configs);
@@ -45,12 +55,21 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfigSchema> {
     for version_config in all_versions_configs {
         let version_config_content = std::fs::read_to_string(
             version_config
-                .expect("Unable to read version config")
+                .unwrap_or_else(|_| {
+                    error!("Unable to read version config");
+                    std::process::exit(1)
+                })
                 .path(),
         )
-        .expect("Unable to read version config content");
+        .unwrap_or_else(|_| {
+            error!("Unable to read version config content");
+            std::process::exit(1)
+        });
         let version_config_parsed: VersionConfigSchema = toml::from_str(&version_config_content)
-            .expect("Unable to convert version config to TOML");
+            .unwrap_or_else(|_| {
+                error!("Unable to convert version config to TOML");
+                std::process::exit(1)
+            });
 
         let mut files_needed = version_config_parsed.files_needed.clone();
         let mut directories_needed = version_config_parsed.directories_needed.clone();
@@ -103,7 +122,9 @@ pub fn get_directory_versions(directory: &PathBuf) -> Vec<VersionConfigSchema> {
     }
 }
 
-pub fn sort_versions_by_specificity(versions: Vec<VersionConfigSchema>) -> Vec<VersionConfigSchema> {
+pub fn sort_versions_by_specificity(
+    versions: Vec<VersionConfigSchema>,
+) -> Vec<VersionConfigSchema> {
     let mut sorted_versions = versions;
 
     sorted_versions.sort_by(|a, b| b.specificity.cmp(&a.specificity));
@@ -122,8 +143,13 @@ pub fn create_sample_version_in_versions_directory() {
         specificity: 1,
         project_management_tool: Some("./project".to_string()),
     };
-    let version_config =
-        toml::to_string(&version_config).expect("Unable to convert version config to TOML");
+    let version_config = toml::to_string(&version_config).unwrap_or_else(|_| {
+        error!("Unable to convert version config to TOML");
+        std::process::exit(1)
+    });
 
-    std::fs::write(versions_path, version_config).expect("Unable to write version config to file");
+    std::fs::write(versions_path, version_config).unwrap_or_else(|_| {
+        error!("Unable to write version config to file");
+        std::process::exit(1)
+    });
 }

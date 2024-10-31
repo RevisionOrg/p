@@ -1,3 +1,5 @@
+use log::error;
+
 fn get_shell_aliases() -> String {
     let shell = std::env::var("SHELL").unwrap_or_else(|_| "bash".to_string());
     let bash_shell_aliases = r#"
@@ -54,7 +56,7 @@ pfg() {
     } else if shell.contains("zsh") {
         shell_aliases.push_str(zsh_shell_aliases);
     } else {
-        println!("Your shell is not supported. Use the following aliases at your own risk:");
+        error!("Your shell is not supported. Use the following aliases at your own risk:");
         shell_aliases.push_str(bash_shell_aliases);
     }
 

@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use clap::{Args, Subcommand};
 use colored::Colorize;
+use log::error;
 
 use crate::config;
 
@@ -56,8 +57,10 @@ pub fn get_repositories_directory() -> PathBuf {
     repositories_directory.push("external_versions");
 
     if !repositories_directory.exists() {
-        std::fs::create_dir_all(&repositories_directory)
-            .expect("Unable to create repositories directory");
+        std::fs::create_dir_all(&repositories_directory).unwrap_or_else(|_| {
+            error!("Unable to create repositories directory");
+            std::process::exit(1)
+        });
     }
 
     repositories_directory
@@ -65,19 +68,27 @@ pub fn get_repositories_directory() -> PathBuf {
 
 pub fn get_repositories_configs() -> Vec<Result<std::fs::DirEntry, std::io::Error>> {
     let external_versions_directories = std::fs::read_dir(get_repositories_directory())
-        .expect("Could not read external repositories directory")
+        .unwrap_or_else(|_| {
+            error!("Could not read external repositories directory");
+            std::process::exit(1)
+        })
         .filter(|entry| entry.as_ref().unwrap().path().is_dir());
     let mut external_versions_configs = vec![];
 
     for external_versions_directory in external_versions_directories {
-        let external_versions_directory =
-            external_versions_directory.expect("Unable to read external versions directory");
+        let external_versions_directory = external_versions_directory.unwrap_or_else(|_| {
+            error!("Unable to read external versions directory");
+            std::process::exit(1)
+        });
         let external_versions_directory_configs;
 
         if external_versions_directory.path().join("versions").exists() {
             external_versions_directory_configs =
                 std::fs::read_dir(external_versions_directory.path().join("versions"))
-                    .expect("Unable to read external versions directory")
+                    .unwrap_or_else(|_| {
+                        error!("Unable to read external versions directory");
+                        std::process::exit(1)
+                    })
                     .filter(|entry| entry.as_ref().unwrap().path().extension().unwrap() == "toml");
         } else {
             break;
@@ -120,9 +131,10 @@ pub fn sync_version_repositories() {
                     .arg(version_repository)
                     .arg(&version_repository_name);
                 command.current_dir(&external_versions_directory);
-                command
-                    .output()
-                    .expect("Unable to clone version repository");
+                command.output().unwrap_or_else(|_| {
+                    error!("Unable to clone version repository");
+                    std::process::exit(1)
+                });
             } else {
                 let mut clean_command = std::process::Command::new("git");
                 let mut pull_command = std::process::Command::new("git");
@@ -131,40 +143,53 @@ pub fn sync_version_repositories() {
                 println!("Pulling {}...", version_repository_name);
                 clean_command.arg("clean").arg("-df");
                 clean_command.current_dir(&version_repository_path);
-                clean_command
-                    .output()
-                    .expect("Unable to clean version repository");
+                clean_command.output().unwrap_or_else(|_| {
+                    error!("Unable to clean version repository");
+                    std::process::exit(1)
+                });
 
                 pull_command.arg("pull");
                 pull_command.current_dir(&version_repository_path);
-                pull_command
-                    .output()
-                    .expect("Unable to pull version repository");
+                pull_command.output().unwrap_or_else(|_| {
+                    error!("Unable to pull version repository");
+                    std::process::exit(1)
+                });
 
                 reset_command.arg("reset").arg("--hard");
                 reset_command.current_dir(&version_repository_path);
-                reset_command
-                    .output()
-                    .expect("Unable to clean version repository");
+                reset_command.output().unwrap_or_else(|_| {
+                    error!("Unable to clean version repository");
+                    std::process::exit(1)
+                });
             }
         }
 
         // Remove any external versions that are no longer in the config but are in the directory
         let external_versions_directories = std::fs::read_dir(&external_versions_directory)
-            .expect("Unable to read external versions directory");
+            .unwrap_or_else(|_| {
+                error!("Unable to read external versions directory");
+                std::process::exit(1)
+            });
 
         for external_versions_directory in external_versions_directories {
-            let external_versions_directory =
-                external_versions_directory.expect("Unable to read external versions directory");
+            let external_versions_directory = external_versions_directory.unwrap_or_else(|_| {
+                error!("Unable to read external versions directory");
+                std::process::exit(1)
+            });
             let external_versions_directory_name = external_versions_directory
                 .file_name()
                 .into_string()
-                .expect("Unable to convert external versions directory name to string");
+                .unwrap_or_else(|_| {
+                    error!("Unable to convert external versions directory name to string");
+                    std::process::exit(1)
+                });
 
             if !&version_repository_names.contains(&external_versions_directory_name) {
                 println!("Removing {}...", external_versions_directory_name);
-                std::fs::remove_dir_all(external_versions_directory.path())
-                    .expect("Unable to remove external versions directory");
+                std::fs::remove_dir_all(external_versions_directory.path()).unwrap_or_else(|_| {
+                    error!("Unable to remove external versions directory");
+                    std::process::exit(1)
+                });
             }
         }
 
@@ -172,22 +197,32 @@ pub fn sync_version_repositories() {
     } else {
         // Clean up any external versions that are in the directory if there are no version repositories in the config
         let external_versions_directories = std::fs::read_dir(&external_versions_directory)
-            .expect("Unable to read external versions directory");
+            .unwrap_or_else(|_| {
+                error!("Unable to read external versions directory");
+                std::process::exit(1)
+            });
 
         for external_versions_directory in external_versions_directories {
-            let external_versions_directory =
-                external_versions_directory.expect("Unable to read external versions directory");
+            let external_versions_directory = external_versions_directory.unwrap_or_else(|_| {
+                error!("Unable to read external versions directory");
+                std::process::exit(1)
+            });
             let external_versions_directory_name = external_versions_directory
                 .file_name()
                 .into_string()
-                .expect("Unable to convert external versions directory name to string");
+                .unwrap_or_else(|_| {
+                    error!("Unable to convert external versions directory name to string");
+                    std::process::exit(1)
+                });
 
             println!("Removing {}...", external_versions_directory_name);
-            std::fs::remove_dir_all(external_versions_directory.path())
-                .expect("Unable to remove external versions directory");
+            std::fs::remove_dir_all(external_versions_directory.path()).unwrap_or_else(|_| {
+                error!("Unable to remove external versions directory");
+                std::process::exit(1)
+            });
         }
 
-        println!("No external version repositories found in config");
+        error!("No external version repositories found in config");
     }
 }
 
@@ -242,12 +277,15 @@ pub fn list_version_repositories() {
             println!("{}", version_repository);
         }
     } else {
-        println!("No external version repositories found in config");
+        error!("No external version repositories found in config");
     }
 }
 
 pub fn create_new_repository(repository_name: &str) {
-    let current_dir = std::env::current_dir().expect("Unable to get current directory");
+    let current_dir = std::env::current_dir().unwrap_or_else(|_| {
+        error!("Unable to get current directory");
+        std::process::exit(1)
+    });
     let mut version_repository_path = current_dir.clone();
     version_repository_path.push(&repository_name);
 
@@ -257,19 +295,30 @@ pub fn create_new_repository(repository_name: &str) {
         println!("Creating {}...", repository_name);
         command.arg("init").arg(&repository_name);
         command.current_dir(&current_dir);
-        command
-            .output()
-            .expect("Unable to create version repository");
+        command.output().unwrap_or_else(|_| {
+            error!("Unable to create version repository");
+            std::process::exit(1)
+        });
 
         let mut versions_path = version_repository_path.clone();
         versions_path.push("versions");
 
-        std::fs::create_dir(&versions_path).expect("Unable to create versions directory");
+        std::fs::create_dir(&versions_path).unwrap_or_else(|_| {
+            error!("Unable to create versions directory");
+            std::process::exit(1)
+        });
 
-        println!("New external version repository \"{}\" created in {}", repository_name, &version_repository_path.display());
-        println!("Add version configs to {}/versions, commit and push the results.", repository_name);
+        println!(
+            "New external version repository \"{}\" created in {}",
+            repository_name,
+            &version_repository_path.display()
+        );
+        println!(
+            "Add version configs to {}/versions, commit and push the results.",
+            repository_name
+        );
         println!("You will then be able to add the repository to your config by running \"p repo add REPOSITORY_URL\"");
     } else {
-        println!("{} already exists", repository_name);
+        error!("{} already exists", repository_name);
     }
 }

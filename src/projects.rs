@@ -4,6 +4,7 @@ use clap::CommandFactory;
 use clap_complete::generate;
 use clap_complete::Shell::{Bash, Zsh};
 use colored::Colorize;
+use log::error;
 use simsearch::SimSearch;
 
 use crate::versions::VersionConfigSchema;
@@ -47,8 +48,11 @@ pub fn get_project_for_directory(custom_directory: Option<&str>) -> Option<Proje
 }
 
 pub fn get_info_for_project_in_directory(directory: Option<&str>) {
-    let current_project = get_project_for_directory(directory)
-        .expect("Could not get a project in the given directory");
+    let current_project = get_project_for_directory(directory).unwrap_or_else(|| {
+        error!("Could not find a project in the current directory");
+
+        std::process::exit(1);
+    });
 
     println!(
         "{}",
@@ -83,10 +87,15 @@ pub fn get_info_for_project_in_directory(directory: Option<&str>) {
 
 pub fn list_projects_in_projects_directory(config: &UserConfigSchema) {
     let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
-    let projects = std::fs::read_dir(&projects_dir)
-        .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
+    let projects = std::fs::read_dir(&projects_dir).unwrap_or_else(|_| {
+        error!("Unable to read projects directory: {}", projects_dir);
+        std::process::exit(1);
+    });
     let projects_count = std::fs::read_dir(&projects_dir.clone())
-        .unwrap_or_else(|_| panic!("Unable to read projects directory"))
+        .unwrap_or_else(|_| {
+            error!("Unable to read projects directory");
+            std::process::exit(1);
+        })
         .count();
     let projects_string = format!(
         "{} {}:",
@@ -126,7 +135,7 @@ pub fn execute_in_current_project(config: &UserConfigSchema, execute_args: &Exec
     let project = match project_result {
         Some(project) => project,
         None => {
-            println!("Could not find a project in the current directory");
+            error!("Could not find a project in the current directory");
             return;
         }
     };
@@ -153,9 +162,15 @@ pub fn execute_in_current_project(config: &UserConfigSchema, execute_args: &Exec
     command.args(&execute_args.arguments);
     command
         .spawn()
-        .expect("Error executing command in current project")
+        .unwrap_or_else(|_| {
+            error!("Error executing command in current project");
+            std::process::exit(1)
+        })
         .wait()
-        .expect("Error executing command in current project");
+        .unwrap_or_else(|_| {
+            error!("Error executing command in current project");
+            std::process::exit(1)
+        });
 }
 
 pub fn get_project_path(config: &UserConfigSchema, go_args: &GoArgs) -> Option<String> {
@@ -193,8 +208,10 @@ pub fn get_shell_completions(completions_args: &CompletionsArgs) {
 
 pub fn find_project_in_projects_directory(config: &UserConfigSchema, command_config: &FindArgs) {
     let projects_dir = shellexpand::tilde(&config.projects_dir).into_owned();
-    let projects = std::fs::read_dir(&projects_dir)
-        .unwrap_or_else(|_| panic!("Unable to read projects directory: {}", projects_dir));
+    let projects = std::fs::read_dir(&projects_dir).unwrap_or_else(|_| {
+        error!("Unable to read projects directory: {}", projects_dir);
+        std::process::exit(1);
+    });
     let mut engine: SimSearch<u32> = SimSearch::new();
     let mut engine_insert_index = 0;
     let mut project_names: Vec<String> = Vec::new();
@@ -206,7 +223,10 @@ pub fn find_project_in_projects_directory(config: &UserConfigSchema, command_con
     };
 
     for project in projects {
-        let project = project.expect("Unable to read project");
+        let project = project.unwrap_or_else(|_| {
+            error!("Unable to read project");
+            std::process::exit(1)
+        });
         let project_path = project.path();
 
         project_names.push(
@@ -227,7 +247,7 @@ pub fn find_project_in_projects_directory(config: &UserConfigSchema, command_con
     let project_search_result = engine.search(project_name);
 
     if project_search_result.len() == 0 {
-        println!("No project \"{}\" found", project_name);
+        error!("No project \"{}\" found", project_name);
         return;
     }
 
@@ -276,7 +296,10 @@ pub fn open_editor_in_current_project(
             .arg("-c")
             .arg(editor.unwrap())
             .spawn()
-            .expect("Error: Failed to run editor");
+            .unwrap_or_else(|_| {
+                error!("Failed to run editor");
+                std::process::exit(1)
+            });
 
         return;
     }
@@ -286,7 +309,13 @@ pub fn open_editor_in_current_project(
         .arg("-c")
         .arg(editor.unwrap())
         .spawn()
-        .expect("Error: Failed to run editor")
+        .unwrap_or_else(|_| {
+            error!("Failed to run editor");
+            std::process::exit(1)
+        })
         .wait()
-        .expect("Error: Editor returned a non-zero status");
+        .unwrap_or_else(|_| {
+            error!("Editor returned a non-zero status");
+            std::process::exit(1)
+        });
 }

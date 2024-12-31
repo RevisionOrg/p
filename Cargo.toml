@@ -13,7 +13,7 @@ openssl = { version = "0.10.63", optional = true }
 predicates = "3.0.4"
 regex = "1.9.6"
 reqwest = "0.12.9"
-self_update = { version = "0.41.0", features = [
+self_update = { version = "0.42.0", features = [
   "archive-tar",
   "compression-flate2",
 ] }
